@@ -1,0 +1,79 @@
+\documentclass{beamer}
+\usepackage{../../resources/style}
+
+% --- Theme ---
+\usetheme{Madrid}
+\usecolortheme{default}
+
+% --- Lesson metadata ---
+\title{Lesson Title}
+\subtitle{Lesson 00}
+\author{Andrei}
+\institute{Algolymp Summer School}
+\date{}
+\titlegraphic{\includegraphics[width=4cm]{../../resources/algolymp-logo.png}}
+\setbeamertemplate{frame footer}{Algolymp Summer School}
+
+% ----------------------------------------------------------------
+\begin{document}
+
+\begin{frame}
+  \titlepage
+\end{frame}
+
+\begin{frame}{Outline}
+  \tableofcontents
+\end{frame}
+
+% ----------------------------------------------------------------
+\section{Overview}
+
+\begin{frame}{Overview}
+  \begin{itemize}
+    \item Topic 1
+    \item Topic 2
+    \item Topic 3
+  \end{itemize}
+\end{frame}
+
+% ----------------------------------------------------------------
+\section{Theory}
+
+\begin{frame}{Key Concept}
+  \begin{block}{Definition}
+    Definition goes here.
+  \end{block}
+\end{frame}
+
+% ----------------------------------------------------------------
+\section{Algorithm}
+
+\begin{frame}[fragile, shrink]{Example Code}
+  \begin{lstlisting}[caption={Example C++ code}]
+#include <bits/stdc++.h>
+using namespace std;
+
+int main() {
+    // code here
+    return 0;
+}
+  \end{lstlisting}
+\end{frame}
+
+% ----------------------------------------------------------------
+\section{Complexity}
+
+\begin{frame}{Complexity Analysis}
+  \begin{center}
+  \begin{tabular}{lll}
+    \toprule
+    Algorithm & Time & Space \\
+    \midrule
+    Example   & $O(n)$ & $O(1)$ \\
+    \bottomrule
+  \end{tabular}
+  \end{center}
+\end{frame}
+
+% ----------------------------------------------------------------
+\end{document}

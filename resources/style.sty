@@ -1,0 +1,78 @@
+\ProvidesPackage{style}
+
+% --- Encoding & language ---
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[english]{babel}
+
+% --- Math ---
+\usepackage{amsmath, amssymb, amsthm}
+
+% --- Code listings ---
+\usepackage{listings}
+\usepackage{xcolor}
+
+\definecolor{codebg}{RGB}{245,245,245}
+\definecolor{codecomment}{RGB}{100,100,100}
+\definecolor{codekeyword}{RGB}{0,0,180}
+\definecolor{codestring}{RGB}{163,21,21}
+
+\lstset{
+  backgroundcolor=\color{codebg},
+  basicstyle=\ttfamily\scriptsize,
+  keywordstyle=\color{codekeyword}\bfseries,
+  commentstyle=\color{codecomment}\itshape,
+  stringstyle=\color{codestring},
+  numbers=left,
+  numberstyle=\tiny\color{gray},
+  stepnumber=1,
+  numbersep=8pt,
+  showspaces=false,
+  showstringspaces=false,
+  breaklines=true,
+  frame=single,
+  rulecolor=\color{gray!40},
+  captionpos=b,
+  language=C++,
+  tabsize=4,
+  morekeywords={vector, pair, map, set, queue, stack, priority_queue, auto}
+}
+
+% --- Graphics ---
+\usepackage{graphicx}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta, positioning, shapes}
+
+% --- Tables ---
+\usepackage{booktabs}
+\usepackage{array}
+
+% --- Beamer font & spacing fixes ---
+\makeatletter
+\@ifclassloaded{beamer}{%
+  % Uniform font size across blocks and itemize
+  \setbeamerfont{block body}{size=\normalsize}
+  \setbeamerfont{block title}{size=\normalsize, series=\bfseries}
+  \setbeamerfont{itemize/enumerate body}{size=\normalsize}
+  \setbeamerfont{itemize/enumerate subbody}{size=\normalsize}
+
+  % Tighter bullet points
+  \setlength{\leftmargini}{1.2em}
+  \setlength{\leftmarginii}{1em}
+  \setlength{\itemsep}{2pt}
+  \setlength{\parskip}{0pt}
+}{}
+\makeatother
+
+% --- Theorem environments (Beamer redefines these, so only define if not in beamer) ---
+\makeatletter
+\@ifclassloaded{beamer}{}{%
+  \theoremstyle{definition}
+  \newtheorem{definition}{Definition}
+  \newtheorem{example}{Example}
+  \newtheorem{exercise}{Exercise}
+  \theoremstyle{plain}
+  \newtheorem{theorem}{Theorem}
+  \newtheorem{proposition}{Proposition}
+}
+\makeatother

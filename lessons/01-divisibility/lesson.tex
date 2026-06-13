@@ -1,0 +1,455 @@
+\documentclass{beamer}
+\usetheme{metropolis}
+\usepackage{../../resources/style}
+
+% Notă pentru începători (apare ca text mic gri la baza slide-ului)
+\newcommand{\beginnote}[1]{%
+  \vfill
+  {\footnotesize\textcolor{gray}{\textit{$\triangleright$ #1 (vezi slide-ul \emph{Resurse})}}}%
+}
+
+\title{Divizibilitate}
+\subtitle{Divizori \textbar\ Numere prime \textbar\ Factorizare \textbar\ Ciurul lui Eratostene}
+\author{Andrei Mihai Ciobanu}
+\institute{Algolymp Summer School}
+\date{}
+\titlegraphic{\includegraphics[width=4cm]{../../resources/algolymp-logo.png}}
+\setbeamertemplate{frame footer}{Algolymp Summer School}
+
+% ----------------------------------------------------------------
+\begin{document}
+
+\begin{frame}
+  \titlepage
+\end{frame}
+
+\begin{frame}{Cuprins}
+  \tableofcontents
+\end{frame}
+
+% ================================================================
+\section{Divizibilitate}
+
+\begin{frame}{Divizibilitate}
+  \begin{block}{Definiție}
+    Spunem că $a$ \textbf{îl divide} pe $b$ (scriem $a \mid b$) dacă există un număr întreg $c$
+    astfel încât $b = a \cdot c$.
+  \end{block}
+  \bigskip
+  \begin{itemize}
+    \item $a$ se numește \textbf{divizor} al lui $b$
+    \item $b$ se numește \textbf{multiplu} al lui $a$
+  \end{itemize}
+  \bigskip
+  Exemple:
+  \begin{itemize}
+    \item $3 \mid 12$ deoarece $12 = 3 \cdot 4$
+    \item $5 \mid 30$ deoarece $30 = 5 \cdot 6$
+    \item $4 \nmid 10$ deoarece nu există $c$ întreg cu $10 = 4 \cdot c$
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Divizori proprii și improprii}
+  \begin{block}{Definiție}
+    \textbf{Divizorii proprii} ai lui $n$ sunt toți divizorii săi \textbf{diferiți de $1$ și de $n$}. \\
+    \textbf{Divizorii improprii} ai lui $n$ sunt $1$ și $n$ însuși.
+  \end{block}
+  \bigskip
+  Exemplu: $n = 12$, divizorii sunt $1, 2, 3, 4, 6, 12$
+  \begin{itemize}
+    \item Proprii: $2, 3, 4, 6$
+    \item Impropriu: $1, 12$
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Găsirea divizorilor \textemdash{} varianta $O(n)$}
+  \begin{block}{Idee}
+    Verificăm fiecare $d \in \{1, 2, \ldots, n\}$ dacă $d \mid n$.
+  \end{block}
+  \bigskip
+  Exemplu: $n = 12$ \\
+  Divizori găsiți: $1, 2, 3, 4, 6, 12$
+  \bigskip
+  \begin{itemize}
+    \item Corect, dar ineficient pentru $n$ mare ($n > 10^7$)
+    \item Putem face mai bine?
+  \end{itemize}
+  \beginnote{$O(f(n))$ = notație pentru complexitate, descrie câte operații face algoritmul raportat la $n$}
+\end{frame}
+
+\begin{frame}{Găsirea divizorilor \textemdash{} reducere la $\lfloor n/2 \rfloor$ iterații}
+  Exemplu: $n = 12$, divizorii sunt $1, 2, 3, 4, 6, 12$. \\
+  Cel mai mare divizor propriu este $6 = 12/2$. De ce nu poate fi mai mare?
+  \bigskip
+  \begin{block}{Demonstrație}
+    Dacă $d \mid n$, atunci $n = d \cdot k$ cu $k \in \mathbb{N}^*$. \\
+    Dacă $d \neq n$, atunci $k \geq 2$, deci $d = \dfrac{n}{k} \leq \dfrac{n}{2}$.
+  \end{block}
+  \bigskip
+  \begin{itemize}
+    \item Căutăm în $\left\{1, 2, \ldots, \left\lfloor\dfrac{n}{2}\right\rfloor\right\}$, adăugăm $n$ separat
+    \item De 2 ori mai rapid, dar încă ineficient pentru $n$ mare
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Găsirea divizorilor \textemdash{} optimizare la $O(\sqrt{n})$}
+  \begin{block}{Observație cheie}
+    Dacă $d \mid n$, atunci și $\frac{n}{d} \mid n$. \\
+    Divizorii vin în \textbf{perechi} $(d,\ n/d)$, cu $d \leq \sqrt{n} \leq n/d$.
+  \end{block}
+  \bigskip
+  \begin{itemize}
+    \item Căutăm doar $d \in \{1, 2, \ldots, \lfloor\sqrt{n}\rfloor\}$
+    \item Pentru fiecare $d$ găsit, adăugăm și perechea $n/d$
+    \item  \textbf{\textcolor{red}{Atenție:}} dacă $d = \sqrt{n}$ (pătrat perfect), adăugăm $d$ o singură dată
+  \end{itemize}
+  \bigskip
+  Exemplu: $n = 36$, $\sqrt{36} = 6$ \\
+  $d=1\to(1,36)$, $d=2\to(2,18)$, $d=3\to(3,12)$, $d=4\to(4,9)$, $d=6\to(6)$
+\end{frame}
+
+\begin{frame}[fragile, shrink]{Găsirea divizorilor \textemdash{} Implementare $O(\sqrt{n})$}
+  \begin{lstlisting}
+void find_divisors(int n) {
+  for (int d = 1; d * d <= n; d++) {
+      if (n % d == 0) {
+          cout << d << " ";
+          if (d != n / d) {
+              cout << n / d << " ";
+          }
+      }
+  }
+}
+  \end{lstlisting}
+  \bigskip
+  Observații:
+  \begin{itemize}
+    \item Divizorii nu sunt găsiți in ordine crescătoare
+    \item \textbf{Atenție la overflow:} \lstinline|d * d| poate depăși \lstinline|INT_MAX| $(2^{31}-1)$ când \lstinline|n| se apropie de \lstinline|INT_MAX| $\rightarrow$ quick fix: \lstinline|(long long)d * d <= n|
+    \item Complexitate de timp: $O(\sqrt{n})$, complexitate de spațiu: $O(1)$
+  \end{itemize}
+  \beginnote{\lstinline|void find_divisors(int n)| este o \textbf{funcție} C++ care primește $n$ și afișează divizorii}
+\end{frame}
+
+% ================================================================
+\section{Numărul și suma divizorilor}
+
+\begin{frame}{Numărul și suma divizorilor în $O(\sqrt{n})$}
+  Folosind aceeași abordare, putem calcula numărul divizorilor (notat și $d(n)$ sau $\tau(n)$) și suma divizorilor (notată și $\sigma(n)$):
+  \bigskip
+  \begin{itemize}
+    \item Pentru fiecare pereche $(d,\ n/d)$ cu $d < n/d$: adăugăm \textbf{2} la $\tau$, $d + n/d$ la $\sigma$
+    \item Dacă $d = n/d$ (pătrat perfect): adăugăm \textbf{1} la $\tau$, $d$ la $\sigma$
+  \end{itemize}
+  \bigskip
+  \begin{block}{Observație \textemdash{} pătrate perfecte}
+    $n$ este pătrat perfect $\Leftrightarrow$ $\tau(n)$ este \textbf{impar}. \\
+    (Toate celelalte numere au număr par de divizori.)
+  \end{block}
+\end{frame}
+
+\begin{frame}[fragile, shrink]{Numărul și suma divizorilor \textemdash{} Implementare}
+  \begin{lstlisting}
+pair<int, long long> nrdiv_sumdiv(int n) {
+    int nrdiv = 0;
+    long long sumdiv = 0;
+    for (int d = 1; d * d <= n; d++) {
+        if (n % d == 0) {
+            if (d == n / d) {
+                nrdiv += 1;
+                sumdiv += d;
+            } else {
+                nrdiv += 2;
+                sumdiv += d + n / d;
+            }
+        }
+    }
+    return { nrdiv, sumdiv };
+}
+  \end{lstlisting}
+  \begin{itemize}
+    \item Exemplu: $n=12 \Rightarrow \tau(n)=6,\ \sigma(n)=28$
+  \end{itemize}
+  \beginnote{\lstinline|pair<int, long long>| = tip STL care stochează 2 valori; \lstinline|.first| și \lstinline|.second| le accesează}
+\end{frame}
+
+% ================================================================
+\section{Numere prime și compuse}
+
+\begin{frame}{Numere prime și compuse}
+  \bigskip
+  \begin{block}{Număr prim \textemdash{} definiție}
+    Un număr natural $p \geq 2$ este \textbf{prim} dacă are exact \textbf{2} divizori: $1$ și $p$.
+  \end{block}
+  \begin{block}{Număr compus \textemdash{} definiție}
+    Un număr natural $n \geq 2$ este \textbf{compus} dacă are \textbf{mai mult de 2} divizori.
+  \end{block}
+  \bigskip
+  \begin{itemize}
+    \item Prime: $2, 3, 5, 7, 11, 13, 17, 19, \ldots$
+    \item Compuse: $4, 6, 8, 9, 10, 12, \ldots$
+    \item $0$ și $1$ nu sunt \textbf{nici prime, nici compuse}
+  \end{itemize}
+\end{frame}
+
+% ================================================================
+\section{Verificarea primalității}
+
+\begin{frame}{Verificarea primalității}
+  \begin{block}{Idee}
+    $n$ este prim $\Leftrightarrow$ nu are niciun divizor $d$ cu $1 < d < n$.
+  \end{block}
+  \bigskip
+  Aplicăm din nou optimizarea cu $\sqrt{n}$:
+  \begin{itemize}
+    \item Dacă $n$ are măcar un divizor propriu, atunci are măcar un divizor propriu $\leq \sqrt{n}$
+    \item Căutăm în $\{2, 3, \ldots, \lfloor\sqrt{n}\rfloor\}$
+    \item Dacă nu găsim niciunul, $n$ este prim
+  \end{itemize}
+  \bigskip
+  \begin{block}{Cazuri speciale}
+    $n < 2$ $\rightarrow$ nici prim, nici compus \quad|\quad $n = 2$ $\rightarrow$ prim
+  \end{block}
+\end{frame}
+
+\begin{frame}[fragile, shrink]{Verificarea primalității \textemdash{} Implementare}
+  \begin{lstlisting}
+bool is_prime(int n) {
+    if (n < 2) {
+      return false;
+    }
+    for (int d = 2; d * d <= n; d++)
+        if (n % d == 0) {
+            return false;
+        }
+    return true;
+}
+  \end{lstlisting}
+  \bigskip
+  \begin{itemize}
+    \item Timp: $O(\sqrt{n})$ \quad Spațiu: $O(1)$
+    \item Eficient pentru un singur număr; ineficient dacă testăm toate numerele până la $n$
+  \end{itemize}
+\end{frame}
+
+% ================================================================
+\section{Descompunerea în factori primi}
+
+\begin{frame}{Factori primi}
+  \begin{block}{Observație cheie}
+    Cel mai mic divizor al lui $n$ mai mare ca $1$ este \textbf{întotdeauna prim}.
+  \end{block}
+  \bigskip
+  De ce? Fie $p$ cel mai mic divizor $> 1$ al lui $n$. \\
+  Dacă $p$ ar fi compus, ar avea un divizor $q$ cu $1 < q < p$. \\
+  Dar atunci $q \mid p$ și $p \mid n$, deci $q \mid n$ \textemdash{} contradicție deoarece ar însemna că $p$ nu mai este cel mai mic divizor al lui $n$.
+  \bigskip
+  \begin{block}{Teorema fundamentală a aritmeticii}
+    Orice $n \geq 2$ se scrie \textbf{unic} ca produs de puteri de prime:
+    \[
+      n = p_1^{a_1} \cdot p_2^{a_2} \cdots p_k^{a_k}, \quad p_1 < p_2 < \cdots < p_k
+    \]
+  \end{block}
+\end{frame}
+
+\begin{frame}{Algoritm de descompunere}
+  \begin{block}{Idee}
+    Împărțim repetat $n$ la cel mai mic factor $p \leq \sqrt{n}$. \\
+    Dacă la final $n = 1$, toți factorii primi au fost deja extrași în buclă; în caz contrar, $n$ este un factor prim cu exponentul $1$. \\
+  \end{block}
+  \bigskip
+  Exemplu: $n = 360$
+  \begin{itemize}
+    \item $360 \div 2 = 180 \div 2 = 90 \div 2 = 45 \quad\Rightarrow\quad 2^3$
+    \item $45 \div 3 = 15 \div 3 = 5 \quad\Rightarrow\quad 3^2$
+    \item $5 > 1 \quad\Rightarrow\quad 5^1$
+    \item Rezultat: $360 = 2^3 \cdot 3^2 \cdot 5$
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile, shrink]{Descompunere în factori primi \textemdash{} Implementare}
+  \begin{lstlisting}
+vector<pair<int,int>> factorize(int n) {
+    vector<pair<int, int>> factors; // (factor prim, exponent)
+    for (int p = 2; p * p <= n; p++) {
+        if (n % p == 0) {
+            int e = 0;
+            while (n % p == 0) {
+                e++;
+                n /= p;
+            }
+            factors.push_back({ p, e });
+        }
+    }
+    if (n > 1) {
+        factors.push_back({ n, 1 });
+    }
+    return factors;
+}
+  \end{lstlisting}
+  \begin{itemize}
+    \item Timp: $O(\sqrt{n})$ \quad Spațiu: $O(\log n)$ \textemdash{} cel mult $\log_2 n$ factori primi distincți
+  \end{itemize}
+  \beginnote{\lstinline|vector<pair<int,int>>| = listă dinamică (STL) de perechi; $\log_2 n$ crește lent: $\log_2(10^6)\approx 20$}
+\end{frame}
+
+\begin{frame}[shrink]{De la descompunere la $\tau(n)$ și $\sigma(n)$}
+  Fie $n = p_1^{a_1} \cdot p_2^{a_2} \cdots p_k^{a_k}$. Orice divizor al lui $n$ are forma
+  $p_1^{b_1} \cdot p_2^{b_2} \cdots p_k^{b_k}$ cu $0 \leq b_i \leq a_i$.
+  \begin{block}{Numărul de divizori}
+    Fiecare $b_i$ poate lua $a_i + 1$ valori, deci:
+    \[ \tau(n) = (a_1+1)(a_2+1)\cdots(a_k+1) \]
+  \end{block}
+  \begin{block}{Suma divizorilor}
+    Înmulțind contribuția fiecărui factor prim:
+    \[ \sigma(n) = \prod_{i=1}^{k}(1 + p_i + p_i^2 + \cdots + p_i^{a_i}) = \prod_{i=1}^{k}\frac{p_i^{a_i+1}-1}{p_i-1} \]
+  \end{block}
+  Exemplu: $360 = 2^3 \cdot 3^2 \cdot 5^1$
+  \begin{itemize}
+    \item $\tau(360) = 4 \cdot 3 \cdot 2 = 24$
+    \item $\sigma(360) = (1{+}2{+}4{+}8)(1{+}3{+}9)(1{+}5) = 15 \cdot 13 \cdot 6 = 1170$
+  \end{itemize}
+\end{frame}
+
+% ================================================================
+\section{Ciurul lui Eratostene}
+
+\begin{frame}{Motivație \textemdash{} de ce avem nevoie de ciur?}
+  \begin{itemize}
+    \item \texttt{is\_prime(n)} în $O(\sqrt{n})$ e bun pentru \textbf{un singur număr}
+    \item Dacă vrem \textbf{toate} primele $\leq n$, aplicând \texttt{is\_prime} de $n$ ori $\Rightarrow O(n\sqrt{n})$
+    \item Putem face mult mai bine: $O(n \log n)$ sau $O(n \log \log n)$
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Ciurul lui Eratostene \textemdash{} Idee}
+  \begin{block}{Principiu}
+    Pornim cu toate numerele $\geq 2$ marcate ca \textbf{prime}. \\
+    Pentru fiecare prim $p$ găsit, marcăm toți multiplii $m$ ai lui $p$ cu $m \geq 2p$ ca \textbf{compuși}.
+  \end{block}
+  \bigskip
+  \begin{enumerate}
+    \item Inițializăm \texttt{prime[i] = true} pentru $i \geq 2$
+    \item Pentru $i = 2, 3, \ldots, \lfloor\sqrt{n}\rfloor$:
+    \begin{itemize}
+      \item Dacă \texttt{prime[i]}: marcăm $2i,\ 3i,\ 4i,\ \ldots$ cu \texttt{false}
+    \end{itemize}
+    \item \texttt{prime[k] == true} $\Leftrightarrow$ $k$ este prim
+  \end{enumerate}
+  \medskip
+  \begin{block}{Optimizare}
+    Putem porni de asemenea marcarea de la $i^2$ în loc de $2i$, deoarece toți multiplii $i \cdot k$ cu $k < i$ au fost deja marcați la pasul $k$.
+  \end{block}
+\end{frame}
+
+\begin{frame}[fragile, shrink]{Ciurul lui Eratostene \textemdash{} Implementare}
+  \begin{lstlisting}
+const int nmax = 1000000;
+bool prime[nmax + 1];
+
+void sieve() {
+    for (int i = 2; i <= nmax; i++) {
+        prime[i] = true;
+    }
+    for (int i = 2; i * i <= nmax; i++) {
+        if (prime[i]) {
+            for (int j = 2 * i; j <= nmax; j += i) {
+                prime[j] = false;
+            }
+        }
+    }
+}
+  \end{lstlisting}
+  \begin{itemize}
+    \item Timp: $O(n \log n)$ \quad Spațiu: $O(n)$
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile, shrink]{Extensie \textemdash{} Ciur pentru $\tau(n)$ și $\sigma(n)$}
+  Modificăm ciurul pentru a calcula $\tau$ și $\sigma$ pentru \textbf{toate} numerele până la $n$:
+  \begin{lstlisting}
+const int nmax = 1000000;
+int nrdiv[nmax + 1], sumdiv[nmax + 1];
+
+void sieve_divisors() {
+    for (int i = 1; i <= nmax; i++) {
+        nrdiv[i] = sumdiv[i] = 0;
+    }
+    for (int d = 1; d <= nmax; d++) {
+        for (int m = d; m <= nmax; m += d) {
+            nrdiv[m]++;
+            sumdiv[m] += d;
+        }
+    }
+}
+  \end{lstlisting}
+  \begin{itemize}
+    \item Timp: $O(n \log n)$ \quad Spațiu: $O(n)$
+  \end{itemize}
+\end{frame}
+
+% ================================================================
+\section{Recapitulare}
+
+\begin{frame}{Recapitulare \textemdash{} Complexități}
+  \begin{center}
+  \begin{tabular}{lll}
+    \toprule
+    Algoritm & Timp & Spațiu \\
+    \midrule
+    Găsire divizori                  & $O(\sqrt{n})$      & $O(1)$ \\
+    $\tau(n)$, $\sigma(n)$ (un număr) & $O(\sqrt{n})$      & $O(1)$ \\
+    Verificare primalitate           & $O(\sqrt{n})$      & $O(1)$ \\
+    Descompunere în factori primi    & $O(\sqrt{n})$      & $O(\log n)$ \\
+    Ciurul lui Eratostene            & $O(n \log n)$ & $O(n)$ \\
+    Ciur pentru $\tau$, $\sigma$     & $O(n \log n)$      & $O(n)$ \\
+    \bottomrule
+  \end{tabular}
+  \end{center}
+\end{frame}
+
+% ================================================================
+\section{Resurse}
+
+\begin{frame}{Resurse pentru începători}
+  \begin{block}{Complexitate \textemdash{} $O(\ldots)$}
+    \begin{itemize}
+      \item \href{https://infoas.ro/lectie/91/complexitatea-unui-algoritm-timp-si-spatiu-in-c}{\textbf{infoas.ro}} \textemdash{} complexitate timp și spațiu în C++
+      \item \href{https://www.bigocheatsheet.com/}{\textbf{bigocheatsheet.com}} \textemdash{} tabel vizual cu complexitățile comune
+    \end{itemize}
+  \end{block}
+  \begin{block}{Funcții și STL în C++}
+    \begin{itemize}
+      \item \href{https://www.pbinfo.ro/articole/23702/standard-template-library-stl}{\textbf{pbinfo.ro}} \textemdash{} Standard Template Library
+      \item \href{https://cppreference.com}{\textbf{cppreference.com}} \textemdash{} documentație completă
+    \end{itemize}
+  \end{block}
+  \begin{block}{Logaritm}
+    \begin{itemize}
+      \item $\log_2 n$ = de câte ori împarți $n$ la $2$ până ajungi la $1$
+      \item Exemplu: $\log_2 8 = 3$ deoarece $8 \to 4 \to 2 \to 1$ (3 pași)
+    \end{itemize}
+  \end{block}
+\end{frame}
+
+% ================================================================
+\section{Probleme de antrenament}
+
+\begin{frame}{Probleme de antrenament}
+  \begin{block}{pbinfo.ro}
+    \begin{itemize}
+      \item \href{https://www.pbinfo.ro/probleme/376/suma-divizori}{\textbf{suma-divizori}}
+      \item \href{https://www.pbinfo.ro/probleme/45/verifprim}{\textbf{verifprim}}
+      \item \href{https://www.pbinfo.ro/probleme/373/nprime}{\textbf{nprime}}
+      \item \href{https://www.pbinfo.ro/probleme/62/factorizare}{\textbf{factorizare}}
+    \end{itemize}
+  \end{block}
+  \begin{block}{infoarena.ro}
+    \begin{itemize}
+      \item \href{https://www.infoarena.ro/problema/ssnd}{\textbf{ssnd}}
+      \item \href{https://www.infoarena.ro/problema/ciur}{\textbf{ciur}}
+    \end{itemize}
+  \end{block}
+\end{frame}
+
+\end{document}
