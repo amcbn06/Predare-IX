@@ -30,10 +30,104 @@
 % ================================================================
 \section{Algoritmul lui Euclid}
 
-\begin{frame}{Algoritmul lui Euclid \textemdash{} Idee}
+\begin{frame}{Cel mai mare divizor comun}
+  \begin{block}{Cel mai mare divizor comun}
+    $\text{cmmdc}(a, b)$ = cel mai mare număr natural $d$ astfel încât $d \mid a$ și $d \mid b$. Se mai notează și $\gcd(a, b)$ (\textit{greatest common divisor}) sau doar $(a, b)$.
+  \end{block}
+  \bigskip
+  \begin{block}{Cel mai mic multiplu comun}
+    $\text{cmmmc}(a, b)$ = cel mai mic număr natural $m$ astfel încât $a \mid m$ și $b \mid m$. Se mai notează și $\text{lcm}(a, b)$ (\textit{lowest common multiple}) sau doar $[a, b]$.
+  \end{block}
+  \bigskip
+  Exemple:
+  \begin{itemize}
+    \item $\gcd(12, 8) = 4$ \quad $\gcd(17, 5) = 1$ \quad $\gcd(100, 75) = 25$
+    \item $\text{lcm}(4, 6) = 12$ \quad $\text{lcm}(3, 5) = 15$
+  \end{itemize}
 \end{frame}
 
-\begin{frame}[fragile]{Algoritmul lui Euclid \textemdash{} Implementare iterativă}
+\begin{frame}{Proprietăți (I)}
+  \begin{itemize}
+    \item $\gcd(a, 0) = \gcd(a, a) = |a|$ \quad \quad (\textit{cazuri de bază})
+    \item $\gcd(a, b) = \gcd(b, a)$ \quad (\textit{comutativitate})
+    \item $\gcd(a, \gcd(b, c)) = \gcd(\gcd(a, b), c)$ \quad (\textit{asociativitate})
+    \item $\gcd(k \cdot a, k \cdot b) = k \cdot \gcd(a, b)$, pentru $k > 0$
+    \item dacă $\gcd(a, b) = d$, atunci $\gcd\!\left(\dfrac{a}{d},\ \dfrac{b}{d}\right) = 1$
+    \item $a \cdot b = \gcd(a, b) \cdot \text{lcm}(a, b)$
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Proprietăți (II)}
+  \begin{itemize}
+    \item $\gcd(a, b) = \gcd(a \pm k \cdot b,\ b)$, $\forall\, k \in \mathbb{N}$
+    \item \textbf{Consecință directă:} $\gcd(a, b) = \gcd(b,\ a \bmod b)$ \\
+      {\footnotesize\textcolor{gray}{$a \bmod b$ = restul împărțirii lui $a$ la $b$}}
+    \item \textbf{Prin descompunere în factori primi:} dacă
+      $n = \prod p_i^{a_i}$ și $m = \prod p_i^{b_i}$, atunci:
+      \[
+        \gcd(n, m) = \prod p_i^{\min(a_i,\, b_i)} \qquad
+        \text{lcm}(n, m) = \prod p_i^{\max(a_i,\, b_i)}
+      \]
+      Exemplu: $n = 2^3 \cdot 3^2,\ m = 2^1 \cdot 3^4 \;\Rightarrow\;
+        \gcd = 2^1 \cdot 3^2 = 18,\;
+        \text{lcm} = 2^3 \cdot 3^4 = 648$
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Algoritmul lui Euclid \textemdash{} Idee}
+  Știm că $\gcd(a, b) = \gcd(a - b, b)$. Putem aplica această regulă repetat până ajungem la cazul de bază $\gcd(a, 0) = a$.
+  \bigskip
+
+  Exemplu: $\gcd(12, 8)$
+  \begin{itemize}
+    \item $\gcd(12, 8) = \gcd(4, 8) = \gcd(4, 4) = \gcd(0, 4) = 4$ \checkmark
+  \end{itemize}
+  \bigskip
+
+  \begin{block}{\textbf{\textcolor{red}{Contraexemplu:}} $a = 1000, b = 1$}
+    $\gcd(1000, 1) \rightarrow \gcd(999, 1) \rightarrow \gcd(998, 1) \rightarrow \cdots \rightarrow \gcd(0, 1) = 1$\\
+    \medskip
+    1000 de pași pentru un rezultat evident. Putem face mai bine?
+  \end{block}
+\end{frame}
+
+\begin{frame}{Algoritmul lui Euclid \textemdash{} Idee}
+  Observăm că scăderile repetate cu același $b$ sunt echivalente cu restul împărțirii:
+  \[
+    \gcd(a, b) = \gcd(a - b, b) = \gcd(a - 2b, b) = \cdots = \gcd(a \bmod b,\ b)
+  \]
+  \begin{block}{Observație cheie}
+    $\gcd(a, b) = \gcd(b,\ a \bmod b)$, \quad cu cazul de bază $\gcd(a, 0) = a$.
+  \end{block}
+  \bigskip
+  Exemplu: $\gcd(48, 18)$
+  \begin{itemize}
+    \item $\gcd(48, 18) = \gcd(18, 12)$ \quad ($48 \bmod 18 = 12$)
+    \item $\gcd(18, 12) = \gcd(12, 6)$  \quad ($18 \bmod 12 = 6$)
+    \item $\gcd(12,\ 6) = \gcd(6,\ 0)$  \quad\; ($12 \bmod 6 = 0$)
+    \item $\gcd(6, 0) = 6$ \checkmark
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile, shrink]{Algoritmul lui Euclid \textemdash{} Implementare iterativă}
+  \begin{center}
+  \begin{lstlisting}
+int gcd(int a, int b) {
+    while (b != 0) {
+        int r = a % b;
+        a = b;
+        b = r;
+    }
+    return a;
+}
+  \end{lstlisting}
+  \end{center}
+  \begin{itemize}
+    \item Timp: $O(\log \min(a, b))$ \quad Spațiu: $O(1)$
+    \item Exemplu: \lstinline[keepspaces=true]|gcd(48, 18) = 6|
+    \item Cel mai mic multiplu comun: \lstinline[keepspaces=true]|lcm(a, b) = a / gcd(a, b) * b| \\
+      {\footnotesize\textcolor{gray}{Tip: împarte înainte de înmulțire pentru a evita overflow}}
+  \end{itemize}
 \end{frame}
 
 % ================================================================
