@@ -134,56 +134,245 @@ int gcd(int a, int b) {
 \section{Algoritmul lui Euclid extins}
 
 \begin{frame}{Algoritmul lui Euclid extins \textemdash{} Idee}
+  \begin{block}{Identitatea lui Bézout}
+    Pentru orice $a, b \in \mathbb{Z}$, există $x, y \in \mathbb{Z}$ astfel încât:
+    \[ a \cdot x + b \cdot y = \gcd(a, b) \]
+  \end{block}
+  \bigskip
+  Algoritmul lui Euclid extins găsește $x$ și $y$ urmărind coeficienții înapoi prin pașii algoritmului lui Euclid.
+  \medskip
+  \begin{block}{Exemplu: $\gcd(35, 15) = 5$}
+    \begin{itemize}
+      \item $35 = 2 \cdot 15 + 5 \;\Rightarrow\; 5 = 1 \cdot 35 + (-2) \cdot 15$
+      \item Soluție: $x = 1,\ y = -2$ \quad \checkmark
+    \end{itemize}
+  \end{block}
   \vfill
   {\footnotesize\textcolor{gray}{\textit{$\triangleright$ Această secțiune este un concept ușor mai dificil \textemdash{} poți reveni la ea după ce ești confortabil cu restul lecției.}}}
 \end{frame}
 
-\begin{frame}[fragile]{Algoritmul lui Euclid extins \textemdash{} Implementare iterativă}
+\begin{frame}[fragile, shrink]{Algoritmul lui Euclid extins \textemdash{} Implementare iterativă}
+  \begin{center}
+  \begin{lstlisting}
+// Gaseste x, y cu: a*x + b*y = gcd(a, b)
+int gcd_ext(int a, int b, int &x, int &y) {
+    int x0 = 1, y0 = 0;
+    int x1 = 0, y1 = 1;
+    while (b != 0) {
+        int q  = a / b;
+        int xn = x0 - q * x1;
+        int yn = y0 - q * y1;
+        int r  = a % b;
+        a = b;  b = r;
+        x0 = x1; y0 = y1;
+        x1 = xn; y1 = yn;
+    }
+    x = x0; y = y0;
+    return a;
+}
+  \end{lstlisting}
+  \end{center}
+  \begin{itemize}
+    \item \lstinline|int &x| = parametru prin referință: modificările din funcție se văd la apelant
+    \item Timp: $O(\log \min(a, b))$ \quad Spațiu: $O(1)$
+  \end{itemize}
 \end{frame}
 
 % ================================================================
 \section{Exponențiere rapidă}
 
 \begin{frame}{Exponențiere rapidă \textemdash{} Idee}
+  \begin{block}{Problema}
+    Calculează $a^n$ eficient. Varianta naivă ($a \cdot a \cdots a$, de $n$ ori) are complexitate $O(n)$.
+  \end{block}
+  \bigskip
+  \begin{block}{Observație cheie}
+    \[
+      a^n = \begin{cases}
+        1 & n = 0 \\
+        \left(a^{n/2}\right)^2 & n \text{ par} \\
+        a \cdot a^{n-1} & n \text{ impar}
+      \end{cases}
+    \]
+  \end{block}
+  \bigskip
+  Exemplu: $2^{10} \rightarrow 2^5 \rightarrow 2^4 \rightarrow 2^2 \rightarrow 2^1 \rightarrow 2^0$ \quad (5 pași în loc de 10)
 \end{frame}
 
-\begin{frame}[fragile]{Exponențiere rapidă \textemdash{} Implementare iterativă}
+\begin{frame}[fragile, shrink]{Exponențiere rapidă \textemdash{} Implementare iterativă}
+  \begin{center}
+  \begin{lstlisting}
+long long power(long long base, int exp) {
+    long long result = 1;
+    while (exp > 0) {
+        if (exp % 2 == 1)
+            result *= base;
+        base *= base;
+        exp /= 2;
+    }
+    return result;
+}
+  \end{lstlisting}
+  \end{center}
+  \begin{itemize}
+    \item Timp: $O(\log n)$ \quad Spațiu: $O(1)$
+    \item \textbf{Atenție:} \lstinline|base * base| poate da overflow pentru baze mari \textemdash{} în concursuri se lucrează de obicei modulo un număr prim
+  \end{itemize}
 \end{frame}
 
 % ================================================================
 \section{Bonus \textemdash{} Implementări recursive}
 
 \begin{frame}{Recursivitate \textemdash{} Ce este?}
+  \begin{block}{Definiție}
+    O funcție este \textbf{recursivă} dacă se apelează pe ea însăși.
+  \end{block}
+  \bigskip
+  Orice funcție recursivă are nevoie de:
+  \begin{itemize}
+    \item Un \textbf{caz de bază} \textemdash{} condiția de oprire (altfel rulează la infinit)
+    \item Un \textbf{apel recursiv} pe o subproblemă mai mică
+  \end{itemize}
+  \bigskip
+  Exemplu: $n! = n \cdot (n-1)!$, cu cazul de bază $0! = 1$
+  \beginnote{Recursivitate \textemdash{} concept nou; caută \emph{``funcții recursive C++''} pe cppreference.com sau pbinfo.ro}
 \end{frame}
 
 \begin{frame}{De ce implementări recursive?}
+  \begin{itemize}
+    \item Codul reflectă direct definiția matematică \textemdash{} mai ușor de înțeles și de scris
+    \item De obicei mai scurt decât varianta iterativă
+  \end{itemize}
+  \medskip
+  \begin{block}{\textbf{\textcolor{red}{Atenție}} \textemdash{} dezavantaje}
+    \begin{itemize}
+      \item Overhead de apeluri de funcție \textemdash{} ușor mai lent
+      \item Pentru intrări foarte mari poate da \textbf{stack overflow}
+    \end{itemize}
+  \end{block}
+  \medskip
+  \begin{block}{Concluzie}
+    Varianta recursivă e utilă pentru a \textbf{înțelege} algoritmul; \\ varianta iterativă e de preferat în concursuri.
+  \end{block}
 \end{frame}
 
-\begin{frame}[fragile]{Algoritmul lui Euclid \textemdash{} Implementare recursivă}
+\begin{frame}[fragile, shrink]{Algoritmul lui Euclid \textemdash{} Implementare recursivă}
+  \begin{center}
+  \begin{lstlisting}
+int gcd(int a, int b) {
+    if (b == 0)
+        return a;
+    return gcd(b, a % b);
+}
+  \end{lstlisting}
+  \end{center}
+  \bigskip
+  \begin{itemize}
+    \item Codul reflectă direct proprietatea $\gcd(a, b) = \gcd(b,\ a \bmod b)$
+    \item Aceeași complexitate ca varianta iterativă: $O(\log \min(a, b))$
+  \end{itemize}
 \end{frame}
 
-\begin{frame}[fragile]{Algoritmul lui Euclid extins \textemdash{} Implementare recursivă}
+\begin{frame}[fragile, shrink]{Algoritmul lui Euclid extins \textemdash{} Implementare recursivă}
+  \begin{center}
+  \begin{lstlisting}
+int gcd_ext(int a, int b, int &x, int &y) {
+    if (b == 0) {
+        x = 1; y = 0;
+        return a;
+    }
+    int x1, y1;
+    int d = gcd_ext(b, a % b, x1, y1);
+    x = y1;
+    y = x1 - (a / b) * y1;
+    return d;
+}
+  \end{lstlisting}
+  \end{center}
+  \begin{itemize}
+    \item Timp: $O(\log \min(a, b))$ \quad Spațiu: $O(\log \min(a, b))$ \textemdash{} stiva de apeluri
+  \end{itemize}
 \end{frame}
 
-\begin{frame}[fragile]{Exponențiere rapidă \textemdash{} Implementare recursivă}
+\begin{frame}[fragile, shrink]{Exponențiere rapidă \textemdash{} Implementare recursivă}
+  \begin{center}
+  \begin{lstlisting}
+long long power(long long base, int exp) {
+    if (exp == 0)
+        return 1;
+    if (exp % 2 == 0) {
+        long long half = power(base, exp / 2);
+        return half * half;
+    }
+    return base * power(base, exp - 1);
+}
+  \end{lstlisting}
+  \end{center}
+  \begin{itemize}
+    \item \lstinline|half * half| evită calculul dublu \lstinline|power(base, exp/2) * power(base, exp/2)|
+    \item Timp: $O(\log n)$ \quad Spațiu: $O(\log n)$ \textemdash{} stiva de apeluri
+  \end{itemize}
 \end{frame}
 
 % ================================================================
 \section{Recapitulare}
 
 \begin{frame}{Recapitulare \textemdash{} Complexități}
+  \begin{center}
+  \begin{tabular}{lll}
+    \toprule
+    Algoritm & Timp & Spațiu \\
+    \midrule
+    $\gcd$ iterativ                & $O(\log \min(a,b))$ & $O(1)$ \\
+    $\gcd$ extins iterativ         & $O(\log \min(a,b))$ & $O(1)$ \\
+    $\gcd$ recursiv                & $O(\log \min(a,b))$ & $O(\log \min(a,b))$ \\
+    $\gcd$ extins recursiv         & $O(\log \min(a,b))$ & $O(\log \min(a,b))$ \\
+    Exponențiere rapidă iterativă  & $O(\log n)$         & $O(1)$ \\
+    Exponențiere rapidă recursivă  & $O(\log n)$         & $O(\log n)$ \\
+    \bottomrule
+  \end{tabular}
+  \end{center}
 \end{frame}
 
 % ================================================================
 \section{Resurse}
 
 \begin{frame}{Resurse}
+  \begin{block}{Algoritmul lui Euclid \textemdash{} $\gcd$ și $\text{lcm}$}
+    \begin{itemize}
+      \item \href{https://cp-algorithms.com/algebra/euclid-algorithm.html}{\textbf{cp-algorithms.com}} \textemdash{} Euclidean algorithm (EN)
+      \item \href{https://cp-algorithms.com/algebra/extended-euclid-algorithm.html}{\textbf{cp-algorithms.com}} \textemdash{} Extended Euclidean algorithm (EN)
+    \end{itemize}
+  \end{block}
+  \begin{block}{Exponențiere rapidă}
+    \begin{itemize}
+      \item \href{https://cp-algorithms.com/algebra/binary-exp.html}{\textbf{cp-algorithms.com}} \textemdash{} Binary exponentiation (EN)
+    \end{itemize}
+  \end{block}
+  \begin{block}{Recursivitate}
+    \begin{itemize}
+      \item \href{https://cppreference.com}{\textbf{cppreference.com}} \textemdash{} documentație funcții C++
+      \item Caută \emph{``recursivitate''} pe \textbf{pbinfo.ro}
+    \end{itemize}
+  \end{block}
 \end{frame}
 
 % ================================================================
 \section{Probleme de antrenament}
 
 \begin{frame}{Probleme de antrenament}
+  \begin{block}{pbinfo.ro}
+    \begin{itemize}
+      \item \href{https://www.pbinfo.ro/probleme/96/cmmdc}{\textbf{cmmdc}}
+      \item \href{https://www.pbinfo.ro/probleme/97/cmmmc}{\textbf{cmmmc}}
+      \item \href{https://www.pbinfo.ro/probleme/1172/putere2}{\textbf{putere2}}
+    \end{itemize}
+  \end{block}
+  \begin{block}{infoarena.ro}
+    \begin{itemize}
+      \item \href{https://www.infoarena.ro/problema/euclid3}{\textbf{euclid3}}
+    \end{itemize}
+  \end{block}
 \end{frame}
 
 \end{document}
