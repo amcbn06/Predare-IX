@@ -6,9 +6,9 @@ Weekly lessons covering algorithms and data structures for 9th grade students.
 
 | # | Topic |
 |---|-------|
-| 01 | Divisibility: Sieve of Eratosthenes / Prime factorization / Sum and number of divisors |
-| 02 | Euclid's Algorithm / Fast exponentiation |
-| 03 | Number systems: Conversions / Memory representation / Bitwise operations |
+| [01](lessons/01-divisibility/lesson.pdf) | Divisibility: Sieve of Eratosthenes / Prime factorization / Sum and number of divisors |
+| [02](lessons/02-euclid-exponentiation/lesson.pdf) | Euclid's Algorithm / Fast exponentiation |
+| [03](lessons/03-number-systems-bitwise/lesson.pdf) | Number systems: Conversions / Memory representation / Bitwise operations |
 | 04 | Sorting algorithms: Bubble Sort / STL sort / Counting Sort |
 | 05 | Binary search |
 | 06 | Fibonacci sequence / Algorithm for determining the majority element |

@@ -1,0 +1,535 @@
+\documentclass{beamer}
+\usetheme{metropolis}
+\usepackage{../../resources/style}
+
+% Notă pentru începători (apare ca text mic gri la baza slide-ului)
+\newcommand{\beginnote}[1]{%
+  \vfill
+  {\footnotesize\textcolor{gray}{\textit{$\triangleright$ #1 (vezi slide-ul \emph{Resurse})}}}%
+}
+
+\title{Sisteme de numerație \textbar\ Operații pe biți}
+\subtitle{}
+\author{Andrei Mihai Ciobanu}
+\institute{Algolymp Summer School}
+\date{}
+\titlegraphic{\includegraphics[width=4cm]{../../resources/algolymp-logo.png}}
+\setbeamertemplate{frame footer}{Algolymp Summer School}
+
+% ----------------------------------------------------------------
+\begin{document}
+
+\begin{frame}
+  \titlepage
+\end{frame}
+
+\begin{frame}{Cuprins}
+  \tableofcontents
+\end{frame}
+
+% ================================================================
+\section{Baze de numerație}
+
+\begin{frame}[fragile, shrink]{Baze de numerație}
+  Un număr se poate scrie în orice \textbf{bază} $b$ folosind cifre de la $0$ la $b-1$:
+  \bigskip
+
+  \begin{tabular}{llll}
+    \toprule
+    Baza & Cifre & Exemplu & Sumă de puteri \\
+    \midrule
+    10 (zecimal) & $0 \ldots 9$             & $425_{10}$       & $4 \cdot 10^2 + 2 \cdot 10 + 5$ \\[4pt]
+    2 (binar)    & $0,\ 1$                  & $1101_2 = 13$    & $2^3 + 2^2 + 2^0$ \\[4pt]
+    16 (hexa)    & $0\ldots 9,\ A\ldots F$  & $\text{FF}_{16} = 255$ & $15 \cdot 16 + 15$ \\
+    \bottomrule
+  \end{tabular}
+  \bigskip
+  \begin{itemize}
+    \item În hexazecimal: $A=10,\ B=11,\ C=12,\ D=13,\ E=14,\ F=15$
+    \item În C++: \lstinline|0b1101| = binar, \lstinline|0xFF| = hexazecimal
+  \end{itemize}
+\end{frame}
+
+% ================================================================
+\section{Reprezentarea numerelor în calculator}
+
+\begin{frame}[fragile]{Cum stochează calculatorul numerele?}
+  Calculatoarele lucrează doar cu \textbf{biți} \textemdash{} cifre care pot fi doar \textbf{0} sau \textbf{1}.
+  \bigskip
+
+  Orice număr întreg se reprezintă ca o \textbf{sumă de puteri ale lui 2}:
+  \[
+    13 = 2^3 + 2^2 + 2^0 = 8 + 4 + 1
+  \]
+
+  \begin{block}{Reprezentare pe 8 biți (exemplu: 13)}
+    \begin{center}
+    \begin{tabular}{|c|c|c|c|c|c|c|c|}
+      \hline
+      $2^7$ & $2^6$ & $2^5$ & $2^4$ & $2^3$ & $2^2$ & $2^1$ & $2^0$ \\
+      \hline
+      0 & 0 & 0 & 0 & 1 & 1 & 0 & 1 \\
+      \hline
+    \end{tabular}
+    \end{center}
+  \end{block}
+  \medskip
+  \begin{itemize}
+    \item \lstinline|int| (32 biți) $\rightarrow$ valori de la $-2^{31}$ la $2^{31}-1 \approx 2 \cdot 10^9$
+    \item \lstinline|long long| (64 biți) $\rightarrow$ valori de la $-2^{63}$ la $2^{63}-1 \approx 9 \cdot 10^{18}$
+  \end{itemize}
+\end{frame}
+
+% ================================================================
+\section{Conversii între baze}
+
+\begin{frame}[fragile, shrink]{Conversie din baza 10 în baza $b$}
+  \textbf{Algoritmul:} împărțim repetat la $b$ și citim resturile \textbf{de jos în sus}.
+  \medskip
+
+  Exemplu: $13_{10}$ în baza 2:
+  \begin{itemize}
+    \item $13 \div 2 = 6$ rest $\mathbf{1}$
+    \item $6 \div 2 = 3$ rest $\mathbf{0}$
+    \item $3 \div 2 = 1$ rest $\mathbf{1}$
+    \item $1 \div 2 = 0$ rest $\mathbf{1}$
+    \item $\Rightarrow\ 13_{10} = 1101_2$
+  \end{itemize}
+  \begin{center}
+  \begin{lstlisting}
+// Returneaza cifrele in baza b, de la cel mai semnificativ
+vector<int> toBase(int n, int b) {
+    vector<int> digits;
+    do {
+        digits.push_back(n % b);
+        n /= b;
+    } while (n > 0);
+    reverse(digits.begin(), digits.end());
+    return digits;
+}
+  \end{lstlisting}
+  \end{center}
+  \beginnote{vector, reverse \textemdash{} funcții din STL}
+\end{frame}
+
+\begin{frame}[fragile, shrink]{Conversie din baza $b$ în baza 10}
+  Procesăm cifrele de la stânga la dreapta:
+  \[
+    1101_2 = ((1 \cdot 2 + 1) \cdot 2 + 0) \cdot 2 + 1 = 13
+  \]
+
+  Pas cu pas:
+  \begin{itemize}
+    \item $result = 1$
+    \item $result = 1 \cdot 2 + 1 = 3$
+    \item $result = 3 \cdot 2 + 0 = 6$
+    \item $result = 6 \cdot 2 + 1 = 13$ \checkmark
+  \end{itemize}
+  \begin{center}
+  \begin{lstlisting}
+// digits: cifrele in baza b, de la cel mai semnificativ
+int fromBase(vector<int> digits, int b) {
+    int result = 0;
+    for (int i = 0; i < digits.size(); i++) {
+        result = result * b + digits[i];
+    }
+    return result;
+}
+  \end{lstlisting}
+  \end{center}
+\end{frame}
+
+% ================================================================
+\section{Operații pe biți}
+
+\begin{frame}{Noțiuni de bază}
+  Numerotăm biții unui număr \textbf{de la dreapta la stânga}, începând cu 0.
+
+  \smallskip
+  Exemplu: $x = 13 = 1101_2$
+  \smallskip
+
+  \begin{center}
+  \begin{tabular}{ccccc}
+    \toprule
+    Indice bit & 3 & 2 & 1 & 0 \\
+    \midrule
+    Bit        & 1 & 1 & 0 & 1 \\
+    \midrule
+    Valoare    & 8 & 4 & 2 & 1 \\
+    \bottomrule
+  \end{tabular}
+  \end{center}
+
+  \medskip
+  Biții setați: 3, 2, 0 \quad$\Rightarrow$\quad $2^3 + 2^2 + 2^0 = 8 + 4 + 1 = 13$
+  \medskip
+  \begin{itemize}
+    \item \textbf{LSB} \textemdash{} bitul 0, cel mai din dreapta
+    \item \textbf{MSB} \textemdash{} bitul cu cel mai mare indice setat
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{NOT \textemdash{} \texttt{\textasciitilde}}
+  Inversează \textbf{fiecare bit}: 0 devine 1, 1 devine 0.
+  \bigskip
+  \begin{columns}[T]
+    \begin{column}{0.25\textwidth}
+      \begin{center}
+      \begin{tabular}{cc}
+        \toprule
+        $p$ & $\sim p$ \\
+        \midrule
+        0 & 1 \\
+        1 & 0 \\
+        \bottomrule
+      \end{tabular}
+      \end{center}
+    \end{column}
+    \begin{column}{0.7\textwidth}
+      Exemplu: $a = 10 = 1010_2$
+      \begin{center}
+      \begin{tabular}{rcccc}
+        $a$:     & 1 & 0 & 1 & 0 \\
+        \hline
+        $\sim a$: & 0 & 1 & 0 & 1 \\
+      \end{tabular}
+      \end{center}
+      \begin{center}
+      \begin{lstlisting}
+int a   = 0b1010; // 10
+int r   = ~a;     // -11
+      \end{lstlisting}
+      \end{center}
+      {\footnotesize\textcolor{gray}{Pe 32 biți: $\sim a = -(a+1)$, deci $\sim 10 = -11$}}
+    \end{column}
+  \end{columns}
+  \beginnote{Complement față de 2 \textemdash{} modul în care calculatoarele stochează numerele negative}
+\end{frame}
+
+\begin{frame}[fragile]{AND \textemdash{} \texttt{\&}}
+  Rezultat \textbf{1} dacă \textbf{ambii} biți corespunzători sunt 1.
+  \bigskip
+  \begin{columns}[T]
+    \begin{column}{0.3\textwidth}
+      \begin{center}
+      \begin{tabular}{ccc}
+        \toprule
+        $p$ & $q$ & $p \mathbin{\&} q$ \\
+        \midrule
+        0 & 0 & 0 \\
+        0 & 1 & 0 \\
+        1 & 0 & 0 \\
+        1 & 1 & 1 \\
+        \bottomrule
+      \end{tabular}
+      \end{center}
+    \end{column}
+    \begin{column}{0.65\textwidth}
+      Exemplu: $a = 1010_2,\ b = 1100_2$
+      \begin{center}
+      \begin{tabular}{rcccc}
+        $a$:            & 1 & 0 & 1 & 0 \\
+        $b$:            & 1 & 1 & 0 & 0 \\
+        \hline
+        $a \mathbin{\&} b$: & 1 & 0 & 0 & 0 \\
+      \end{tabular}
+      \end{center}
+      \begin{center}
+      \begin{lstlisting}
+int a = 0b1010, b = 0b1100;
+int r = a & b; // 0b1000 = 8
+      \end{lstlisting}
+      \end{center}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\begin{frame}[fragile]{OR \textemdash{} \texttt{|}}
+  Rezultat \textbf{1} dacă \textbf{cel puțin unul} dintre biți este 1.
+  \bigskip
+  \begin{columns}[T]
+    \begin{column}{0.3\textwidth}
+      \begin{center}
+      \begin{tabular}{ccc}
+        \toprule
+        $p$ & $q$ & $p \mid q$ \\
+        \midrule
+        0 & 0 & 0 \\
+        0 & 1 & 1 \\
+        1 & 0 & 1 \\
+        1 & 1 & 1 \\
+        \bottomrule
+      \end{tabular}
+      \end{center}
+    \end{column}
+    \begin{column}{0.65\textwidth}
+      Exemplu: $a = 1010_2,\ b = 1100_2$
+      \begin{center}
+      \begin{tabular}{rcccc}
+        $a$:        & 1 & 0 & 1 & 0 \\
+        $b$:        & 1 & 1 & 0 & 0 \\
+        \hline
+        $a \mid b$: & 1 & 1 & 1 & 0 \\
+      \end{tabular}
+      \end{center}
+      \begin{center}
+      \begin{lstlisting}
+int a = 0b1010, b = 0b1100;
+int r = a | b; // 0b1110 = 14
+      \end{lstlisting}
+      \end{center}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\begin{frame}[fragile]{XOR \textemdash{} \texttt{\textasciicircum}}
+  Rezultat \textbf{1} dacă biții sunt \textbf{diferiți}.
+  \bigskip
+  \begin{columns}[T]
+    \begin{column}{0.3\textwidth}
+      \begin{center}
+      \begin{tabular}{ccc}
+        \toprule
+        $p$ & $q$ & $p \oplus q$ \\
+        \midrule
+        0 & 0 & 0 \\
+        0 & 1 & 1 \\
+        1 & 0 & 1 \\
+        1 & 1 & 0 \\
+        \bottomrule
+      \end{tabular}
+      \end{center}
+    \end{column}
+    \begin{column}{0.65\textwidth}
+      Exemplu: $a = 1010_2,\ b = 1100_2$
+      \begin{center}
+      \begin{tabular}{rcccc}
+        $a$:            & 1 & 0 & 1 & 0 \\
+        $b$:            & 1 & 1 & 0 & 0 \\
+        \hline
+        $a \oplus b$:   & 0 & 1 & 1 & 0 \\
+      \end{tabular}
+      \end{center}
+      \begin{center}
+      \begin{lstlisting}
+int a = 0b1010, b = 0b1100;
+int r = a ^ b; // 0b0110 = 6
+      \end{lstlisting}
+      \end{center}
+      {\footnotesize\textcolor{gray}{$a \oplus a = 0$; \quad $a \oplus 0 = a$; \quad XOR e comutativ și asociativ}}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\begin{frame}[fragile, shrink]{Deplasări pe biți \textemdash{} Left Shift și Right Shift}
+  \begin{center}
+  \begin{lstlisting}
+int x = 1;      // 0b00000001
+
+int a = x << 3; // 0b00001000 = 8   (x * 2^3)
+int b = x >> 0; // 0b00000001 = 1
+
+int y = 12;     // 0b00001100
+int c = y << 1; // 0b00011000 = 24  (y * 2)
+int d = y >> 1; // 0b00000110 = 6   (y / 2)
+int e = y >> 3; // 0b00000001 = 1   (y / 8)
+  \end{lstlisting}
+  \end{center}
+  \begin{itemize}
+    \item \lstinline|x << k| $= x \cdot 2^k$ \quad (deplasare la stânga)
+    \item \lstinline|x >> k| $= \lfloor x / 2^k \rfloor$ \quad (deplasare la dreapta)
+    \item \textbf{Atenție:} \lstinline|1 << k| dă overflow pentru $k \geq 31$ pe \lstinline|int| \\
+      $\rightarrow$ folosim \lstinline|1ll << k| sau \lstinline|1LL << k| când lucrăm cu \lstinline|long long|
+  \end{itemize}
+\end{frame}
+
+% ================================================================
+\section{Aplicații}
+
+\begin{frame}[fragile]{Operații uzuale pe biți}
+  \begin{lstlisting}
+// Verificam daca al k-lea bit este setat
+bool isSet(int x, int k) {
+    return (x >> k) & 1;
+}
+
+// Caz special: x impar <=> bitul 0 setat
+bool isOdd(int x) {
+    return x & 1;
+}
+
+// Setam al k-lea bit (il facem 1)
+int setBit(int x, int k) {
+    return x | (1 << k);
+}
+
+// Resetam al k-lea bit (il facem 0)
+int clearBit(int x, int k) {
+    return x & ~(1 << k);
+}
+  \end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile, shrink]{Aplicații \textemdash{} Continuare}
+  \begin{lstlisting}
+// Flippuim al k-lea bit (0->1, 1->0)
+int flipBit(int x, int k) {
+    return x ^ (1 << k);
+}
+
+// Ultimii k biti ai lui x  (ex: k=3 => masca 0b0111)
+int lastKBits(int x, int k) {
+    return x & ((1 << k) - 1);
+}
+
+// n e putere de 2 daca are exact un singur bit de 1
+// n & (n-1) elimina cel mai din dreapta bit de 1
+bool isPow2(int n) {
+    return n > 0 && (n & (n - 1)) == 0;
+}
+  \end{lstlisting}
+  \begin{itemize}
+    \item Exemplu: $4 = 100_2$,\ $3 = 011_2$,\ $4 \mathbin{\&} 3 = 0$ \checkmark
+    \item \textbf{Atenție:} folosește \lstinline|1LL << k| în loc de \lstinline|1 << k| pentru \lstinline|long long|
+  \end{itemize}
+\end{frame}
+
+% ================================================================
+\section{Funcții utile}
+
+\begin{frame}[fragile, shrink]{Popcount \textemdash{} Numărul de biți de 1}
+  \begin{center}
+  \begin{lstlisting}
+// Implementare manuala: O(nr. biti)
+int popcount(int x) {
+    int cnt = 0;
+    while (x > 0) { cnt += x & 1; x >>= 1; }
+    return cnt;
+}
+
+// Built-in GCC (O(1), foarte rapid)
+int cnt = __builtin_popcount(x);    // pentru int
+int cnt = __builtin_popcountll(x);  // pentru long long
+  \end{lstlisting}
+  \end{center}
+  \begin{itemize}
+    \item Exemplu: \lstinline|popcount(13)| = \lstinline|popcount(0b1101)| = 3
+    \item Built-in-urile \lstinline|__builtin_*| sunt specifice GCC \textemdash{} merg pe majoritatea compilatoarelor de concurs (g++), dar nu garantat pe MSVC
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile, shrink]{Leading zeros și Trailing zeros}
+  \begin{itemize}
+    \item \textbf{Leading zeros}: biți de 0 \textbf{de la stânga} până la primul bit de 1
+    \item \textbf{Trailing zeros}: biți de 0 \textbf{de la dreapta} până la primul bit de 1
+  \end{itemize}
+  \begin{center}
+  \begin{lstlisting}
+// x = 0b00001100 = 12
+// Leading zeros  = 28 (int are 32 biti, primii 28 sunt 0)
+// Trailing zeros = 2  (ultimii 2 biti sunt 0)
+
+int lz = __builtin_clz(x);  // leading zeros  (int)
+int tz = __builtin_ctz(x);  // trailing zeros (int)
+// Variante pentru long long: __builtin_clzll, __builtin_ctzll
+
+// Atentie: __builtin_clz(0) si __builtin_ctz(0) sunt nedefinite!
+  \end{lstlisting}
+  \end{center}
+  \begin{itemize}
+    \item Trailing zeros al lui $x$ = indicele celui mai mic bit setat al lui $x$
+    \item Exemplu: \lstinline|__builtin_ctz(12)| = \lstinline|__builtin_ctz(0b1100)| = 2
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile, shrink]{Lowest Set Bit \textemdash{} \lstinline|x & (-x)|}
+  \textbf{Lowest set bit} = valoarea celui mai din dreapta bit de 1.
+
+  \begin{center}
+  \begin{lstlisting}
+int lowestBit(int x) { return x & (-x); }
+// x = 12 = 0b1100  =>  lowestBit(12) = 0b0100 = 4
+  \end{lstlisting}
+  \end{center}
+  \medskip
+  \textbf{De ce funcționează?} \textemdash{} Reprezentarea \textbf{complement față de 2}:
+  \begin{itemize}
+    \item $-x = \,\sim\! x + 1$ (inversăm toți biții, adăugăm 1)
+    \item La adunarea lui 1, carry-ul se propagă exact până la primul bit de 1 din $x$
+    \item Astfel $-x$ coincide cu $x$ începând de la primul bit de 1 (inclusiv), restul e inversat
+    \item $x \mathbin{\&} (-x)$ păstrează doar acel bit comun
+  \end{itemize}
+  \medskip
+  Exemplu: $x = 12 = \mathbf{1100}_2$,\quad $-x = \mathbf{0100}_2$ (în 4 biți),\quad $x \mathbin{\&} (-x) = 0100_2 = 4$
+\end{frame}
+
+% ================================================================
+\section{Recapitulare}
+
+\begin{frame}[fragile]{Recapitulare \textemdash{} Operații uzuale}
+  \begin{center}
+  \begin{tabular}{ll}
+    \toprule
+    Operație & Cod C++ \\
+    \midrule
+    Bitul $k$ e setat?   & \lstinline|(x >> k) & 1| \\
+    $x$ e impar?         & \lstinline|x & 1| \\
+    Setează bitul $k$    & \lstinline+x | (1 << k)+ \\
+    Resetează bitul $k$  & \lstinline|x & ~(1 << k)| \\
+    Flip bitul $k$       & \lstinline|x ^ (1 << k)| \\
+    Ultimii $k$ biți     & \lstinline|x & ((1 << k) - 1)| \\
+    $n$ e putere de 2?   & \lstinline|n > 0 && !(n & (n-1))| \\
+    Lowest set bit       & \lstinline|x & (-x)| \\
+    Număr de biți de 1   & \lstinline|__builtin_popcount(x)| \\
+    Trailing zeros       & \lstinline|__builtin_ctz(x)| \\
+    \bottomrule
+  \end{tabular}
+  \end{center}
+\end{frame}
+
+% ================================================================
+\section{Resurse}
+
+\begin{frame}{Resurse}
+  \begin{block}{Baze de numerație}
+    \begin{itemize}
+      \item \href{https://www.pbinfo.ro/articole/5562/baze-de-numeratie}{\textbf{pbinfo.ro}} \textemdash{} Baze de numerație (RO)
+    \end{itemize}
+  \end{block}
+  \begin{block}{Operații pe biți}
+    \begin{itemize}
+      \item \href{https://www.pbinfo.ro/articole/62/operatii-pe-biti}{\textbf{pbinfo.ro}} \textemdash{} Operații pe biți (RO, ușor de înțeles)
+      \item \href{https://cp-algorithms.com/algebra/bit-manipulation.html}{\textbf{cp-algorithms.com}} \textemdash{} Bit manipulation (EN)
+      \item \href{https://cppi.sync.ro/materia/lectii/baze\%20de\%20numeratie,\%20scrierea\%20constantelor\%20si\%20operatii\%20pe\%20biti.pdf}{\textbf{cppi.sync.ro}} \textemdash{} Material mai stufos de Marius Nicoli (RO)
+    \end{itemize}
+  \end{block}
+  \begin{block}{Complement față de 2}
+    \begin{itemize}
+      \item \href{https://en.wikipedia.org/wiki/Two\%27s_complement}{\textbf{wikipedia.org}} \textemdash{} Two's complement (EN)
+    \end{itemize}
+  \end{block}
+\end{frame}
+
+% ================================================================
+\section{Probleme de antrenament}
+
+\begin{frame}{Probleme de antrenament}
+  \begin{block}{Ușoare}
+    \begin{itemize}
+      \item \href{https://www.pbinfo.ro/probleme/2577/getbit}{\textbf{getbit}} {\footnotesize\textcolor{gray}{(pbinfo)}}
+      \item \href{https://www.pbinfo.ro/probleme/2580/setbit0}{\textbf{setbit0}} {\footnotesize\textcolor{gray}{(pbinfo)}}
+      \item \href{https://www.pbinfo.ro/probleme/2581/setbit1}{\textbf{setbit1}} {\footnotesize\textcolor{gray}{(pbinfo)}}
+      \item \href{https://www.pbinfo.ro/probleme/2711/puterebiti}{\textbf{puterebiti}} {\footnotesize\textcolor{gray}{(pbinfo)}}
+    \end{itemize}
+  \end{block}
+  \begin{block}{Medii}
+    \begin{itemize}
+      \item \href{https://code.algolymp.com/problems/4271}{\textbf{Base Bit Report}} {\footnotesize\textcolor{gray}{(AlgoCode)}}
+      \item \href{https://www.pbinfo.ro/probleme/2799/addone}{\textbf{addone}} {\footnotesize\textcolor{gray}{(pbinfo)}}
+      \item \href{https://www.pbinfo.ro/probleme/2624/invbits}{\textbf{invbits}} {\footnotesize\textcolor{gray}{(pbinfo)}}
+    \end{itemize}
+  \end{block}
+\end{frame}
+
+\end{document}
