@@ -1,41 +1,42 @@
-# Algorithms & Data Structures — Grade 9
+# Algolymp Summer School — Clasa a IX-a
 
-Weekly lessons covering algorithms and data structures for 9th grade students.
+Acest modul face parte din **Algolymp Summer School** și urmează programa Olimpiadei Naționale de Informatică din România. Dacă ești în clasa a IX-a și vrei să înveți tot ce ai nevoie pentru a participa la olimpiadă, acest curs e pentru tine! Acoperind toate temele, de la cele mai simple până la cele mai avansate, cursul te ghidează prin programă într-un mod logic și structurat. Dacă ești deja expert în temele prezentate, verifică grupele noastre de practică, unde poți rezolva probleme de dificultăți variate folosind algoritmii acoperiți.
 
-## Syllabus
+## Programa
 
 | # | Topic |
-|---|-------|
-| [01](lessons/01-divisibility/lesson.pdf) | Divisibility: Sieve of Eratosthenes / Prime factorization / Sum and number of divisors |
-| [02](lessons/02-euclid-exponentiation/lesson.pdf) | Euclid's Algorithm / Fast exponentiation |
-| [03](lessons/03-number-systems-bitwise/lesson.pdf) | Number systems: Conversions / Memory representation / Bitwise operations |
-| [04](lessons/04-sorting-bubble-stl-counting/lesson.pdf) | Sorting algorithms: Bubble / Selection / Insertion / STL / Counting Sort |
-| [05](lessons/05-binary-search/lesson.pdf) | Binary search: Iterative & recursive search / STL (lower_bound, upper_bound) / Binary search on the answer |
-| 06 | Fibonacci sequence / Algorithm for determining the majority element |
-| 07 | Introduction to two-dimensional arrays: Traversals / Partitioning into zones |
-| 08 | Partial sums 1D/2D / Difference Arrays 1D/2D |
-| 09 | Two-pointers technique |
-| 10 | Non-homogeneous data types: Struct / Data structures from STL library |
-| 11 | Greedy algorithms: The interval scheduling problem / Various problems |
-| 12 | Mobius Function & Inclusion and Exclusion Principle |
-| 13 | Backtracking: Functions from STL / Generation of combinatorial elements |
+|---|------|
+| [01](lessons/01-divisibility/lesson.pdf) | **Divizibilitate**<br>Ciurul lui Eratostene · Descompunere în factori primi · Suma și numărul divizorilor |
+| [02](lessons/02-euclid-exponentiation/lesson.pdf) | **Algoritmul lui Euclid \| Exponențiere rapidă** |
+| [03](lessons/03-number-systems-bitwise/lesson.pdf) | **Sisteme de numerație \| Operații pe biți** |
+| [04](lessons/04-sorting-bubble-stl-counting/lesson.pdf) | **Algoritmi de sortare**<br>Bubble · Selection · Insertion · STL · Counting Sort |
+| [05](lessons/05-binary-search/lesson.pdf) | **Căutare binară**<br>Varianta clasică · Variații · STL · Complexitate · Căutare binară pe rezultat |
+| 06 | **Funcții \| Algoritmi pe șiruri**<br>Fibonacci · Elementul majoritar · Subsecvența de sumă maximă |
+| 07 | **Tablouri bidimensionale**<br>Parcurgeri · Împărțirea în zone · Simulări |
+| 08 | **Sume parțiale și șmenul lui Mars**<br>Pe șiruri (1D) · Pe matrici (2D) |
+| 09 | **Tehnica Two Pointers**<br>Interclasarea tablourilor · Operații cu mulțimi |
+| 10 | **Tipuri de date non-omogene**<br>Tipul struct · Fișiere text · Structuri de date din STL |
+| 11 | **Algoritmi Greedy**<br>Problema spectacolelor · Diverse probleme |
+| 12 | **Funcția Möbius \| Principiul includerii și excluderii** |
+| 13 | **Backtracking**<br> Generarea elementelor combinatoriale |
+| 14 | **Simulare OJI** |
 
-## Structure
+## Structură
 
 ```
 lessons/
   XX-topic-name/
-    lesson.tex    — LaTeX source
-    lesson.pdf    — compiled PDF (ready to download)
+    lesson.tex    — sursă LaTeX
+    lesson.pdf    — PDF compilat (gata de descărcat)
 resources/
-  style.sty       — shared LaTeX style
-  template.tex    — blank lesson template
+  style.sty       — stil LaTeX comun
+  template.tex    — șablon gol pentru lecții noi
 ```
 
-## Compiling LaTeX
+## Compilare LaTeX
 
 ```bash
 pdflatex lesson.tex
 ```
 
-Requires a standard TeX distribution (TeX Live / MiKTeX).
+Necesită o distribuție TeX standard (TeX Live / MiKTeX).
