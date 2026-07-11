@@ -11,7 +11,7 @@
 % pentru clasa a 6-a (sectiunile 5-6 comentate):
 % \subtitle{Varianta clasică $\cdot$ Variații $\cdot$ STL $\cdot$ Complexitate}
 % pentru clasa a 9-a:
-\subtitle{Varianta clasică $\cdot$ Variații $\cdot$ STL $\cdot$ Complexitate \\ Căutare binară pe răspuns}
+\subtitle{Varianta clasică $\cdot$ Variații $\cdot$ STL $\cdot$ Complexitate \\ Căutare binară pe rezultat}
 \author{Andrei Mihai Ciobanu}
 \institute{Algolymp Summer School}
 \date{}
@@ -41,7 +41,7 @@
 
   \textbf{Căutare binară:} folosim faptul că șirul e sortat și eliminăm jumătate din elemente la fiecare pas.
 
-  \medskip
+  \smallskip
   \begin{center}
   \begin{tabular}{lcc}
     \toprule
@@ -63,7 +63,7 @@
     \end{itemize}
   \end{block}
 
-  \medskip
+  \smallskip
   Păstrăm un interval $[st, dr]$ care conține răspunsul. La fiecare pas:
   \begin{enumerate}
     \item Calculăm mijlocul: $mij = (st + dr) \ / \ 2$
@@ -74,14 +74,14 @@
       \item $v[mij] > x$ $\rightarrow$ $dr = mij - 1$ \textemdash{} căutăm în stânga
     \end{itemize}
   \end{enumerate}
-  \medskip
+  \smallskip
   Ne oprim când găsim valoarea sau când intervalul devine gol ($st > dr$).
 \end{frame}
 
 \begin{frame}{Algoritm pas cu pas}
   Șir sortat: $v = [2,\ 5,\ 8,\ 11,\ 14,\ 17,\ 20,\ 23,\ 26,\ 29,\ 32]$, căutăm $x = 23$.
 
-  \medskip
+  \smallskip
   \begin{itemize}
     \item $st=0,\;dr=10 \Rightarrow mij=5,\;v[5]=17 < 23 \Rightarrow st = 6$
     \item $st=6,\;dr=10 \Rightarrow mij=8,\;v[8]=26 > 23 \Rightarrow dr = 7$
@@ -119,7 +119,7 @@
     }
   \end{tikzpicture}
   \end{center}
-  \medskip
+  \smallskip
   La fiecare pas, intervalul $[st, dr]$ se \textbf{înjumătățește}.
 \end{frame}
 
@@ -185,15 +185,15 @@ cout << poz;
 \begin{frame}{Lower bound \textemdash{} upper bound}
   Căutarea clasică găsește \textbf{o apariție oarecare} a lui $x$. Adesea avem nevoie de:
 
-  \medskip
+  \smallskip
   \begin{itemize}
     \item \textbf{Lower bound:} prima poziție cu $v[poz] \geq x$
     \item \textbf{Upper bound:} prima poziție cu $v[poz] > x$
   \end{itemize}
 
-  \medskip
   Exemplu: $v = [1,\ 2,\ 2,\ 2,\ 3,\ 5]$, $x = 2$
 
+  \smallskip
   \begin{center}
   \begin{tabular}{lcc}
     \toprule
@@ -205,7 +205,7 @@ cout << poz;
   \end{tabular}
   \end{center}
 
-  \medskip
+  \smallskip
   Numărul de apariții ale lui $x$: $\text{upper\_bound} - \text{lower\_bound} = 4 - 1 = 3$
 \end{frame}
 
@@ -330,7 +330,7 @@ int cate = dr - st; // cate = 5  (8, 11, 14, 17, 20)
   \]
   Numărul de pași până ajungem la $1$: $\log_2 n$.
 
-  \medskip
+  \smallskip
   \begin{center}
   \begin{tabular}{lcc}
     \toprule
@@ -345,7 +345,7 @@ int cate = dr - st; // cate = 5  (8, 11, 14, 17, 20)
   \end{tabular}
   \end{center}
 
-  \medskip
+  \smallskip
   Chiar și pentru $n = 10^{18}$, avem cel mult $60$ de pași!
 \end{frame}
 
@@ -359,12 +359,12 @@ int cate = dr - st; // cate = 5  (8, 11, 14, 17, 20)
 \begin{frame}{Căutare binară pe rezultat \textemdash{} exemplu}
   Cea mai puternică aplicație: nu căutăm o valoare într-un șir, ci \textbf{cel mai bun răspuns posibil}.
 
-  \medskip
+  \smallskip
   \begin{block}{Problemă}
     Avem $n$ bețe de lungimi $d_1, d_2, \dots, d_n$. Fiecare băț poate fi tăiat în bucăți mai mici de lungimi întregi. Determinați \textbf{lungimea maximă} $L$ pentru care obținem în total \textbf{cel puțin} $A$ bucăți.
   \end{block}
 
-  \medskip
+  \smallskip
   Restricții: $1 \leq n \leq 10^5$, $1 \leq d_i \leq 10^9$, $1 \leq A \leq 10^9$.
 
   Exemplu: $d = [7,\ 4,\ 9,\ 5]$, $A = 6$ $\Rightarrow$ răspuns $L = 3$ (obținem $2+1+3+1 = 7 \geq 6$ bucăți).
@@ -397,9 +397,9 @@ for (int L = maxim; L >= 1; L--) {
 \begin{frame}{Căutare binară pe rezultat \textemdash{} observație}
   Pe măsură ce $L$ crește, numărul de bucăți obținute de \lstinline|taieBucati(d, L)| \textbf{scade} (sau rămâne la fel).
 
-  \medskip
   Exemplu: $d = [7,\ 4,\ 9,\ 5]$, verificăm $taieBucati(L) \geq A$, $A = 6$
 
+  \smallskip
   \begin{center}
   \begin{tabular}{lccccccccc}
     \toprule
@@ -411,6 +411,7 @@ for (int L = maxim; L >= 1; L--) {
   \end{tabular}
   \end{center}
 
+  \smallskip
   \begin{block}{Observație}
     Șirul de valori $taieBucati(L)$ e \textbf{monoton descrescător}: odată ce scade sub $A$, rămâne sub $A$. Îl putem privi ca pe un șir sortat descrescător (la fel ca la $lower\_bound$, vezi secțiunea \emph{Variații}) și \textbf{eliminăm jumătate din candidați} la fiecare iterație.
   \end{block}
@@ -447,25 +448,24 @@ cout << rez;
   \begin{block}{Observație: overflow}
     La căutarea binară pe rezultat, intervalul $[st, dr]$ poate fi foarte mare (de exemplu $dr = maxim \approx 10^9$), deci $st + dr$ riscă să depășească un \lstinline|int|.
 
-    \medskip
     În astfel de cazuri, ori folosim \lstinline|long long| pentru $st$, $dr$, $mij$, ori schimbăm formula pentru mijloc: \lstinline[keepspaces=true]|mij = st + (dr - st) / 2|.
   \end{block}
 
-  \medskip
+  \smallskip
   Comparativ, la căutarea binară a unui element, $[st, dr]$ e mărginit de $n$ (indici de tablou), deci acest risc de overflow nu apare de obicei.
 \end{frame}
 
 \begin{frame}{Căutare binară pe rezultat \textemdash{} condiția de aplicabilitate}
   Căutarea binară pe rezultat funcționează \textbf{doar} când există o structură de tipul:
 
-  \medskip
+  \smallskip
   \begin{center}
   \begin{tabular}{ccccccccc}
     $\ldots$ & \checkmark & \checkmark & \checkmark & \textbf{$\times$} & $\times$ & $\times$ & $\times$ & $\ldots$ \\
   \end{tabular}
   \end{center}
 
-  \medskip
+  \smallskip
   adică există un \textbf{singur prag} unde condiția $taieBucati(L) \geq A$ trece din adevărat în fals (sau invers) \textemdash{} exact ca în tabelul de la exemplul cu bețele.
 \end{frame}
 
@@ -475,7 +475,7 @@ cout << rez;
     Dacă da pentru toate valorile, funcția e monotonă și poți aplica căutarea binară.
   \end{block}
 
-  \medskip
+  \smallskip
   \begin{block}{Exemple care \textbf{nu} respectă condiția}
     \begin{itemize}
       \item Șir nesortat $\Rightarrow$ nu poți aplica căutarea binară pe element
@@ -496,12 +496,12 @@ cout << rez;
     Căutare secvențială              & $O(n)$      & $O(1)$ \\
     Căutare binară (element)         & $O(\log n)$ & $O(1)$ \\
     STL \texttt{lower/upper\_bound}  & $O(\log n)$ & $O(1)$ \\
-    Căutare binară pe răspuns     & $O(\log n \cdot f(n))$ & depinde \\ 
+    Căutare binară pe rezultat     & $O(\log n \cdot f(n))$ & depinde \\ 
     \bottomrule
   \end{tabular}
   \end{center}
 
-  \medskip
+  \smallskip
   \begin{itemize}
     \item Șirul trebuie sortat înainte de căutare binară
     \item Pentru intervale $[st, dr]$ foarte mari, folosim \lstinline|long long| sau formula sigură \lstinline[keepspaces=true]|mij = st + (dr - st) / 2|
@@ -512,15 +512,16 @@ cout << rez;
 % ================================================================
 \section{Resurse}
 
-\begin{frame}[shrink]{Resurse}
+\begin{frame}{Resurse}
   \begin{block}{Română}
-    \begin{itemize}
+    \begin{itemize}\footnotesize\itemsep0pt
       \item \href{https://www.pbinfo.ro/articole/3633/cautarea-binara}{\textbf{pbinfo.ro}} \textemdash{} Căutarea binară (RO)
       \item \href{https://infoas.ro/lectie/122/cautare-binara-in-c}{\textbf{infoas.ro}} \textemdash{} Căutare binară în C++ (RO)
     \end{itemize}
   \end{block}
+  \vspace{-6pt}
   \begin{block}{Engleză}
-    \begin{itemize}
+    \begin{itemize}\footnotesize\itemsep0pt
       \item \href{https://cp-algorithms.com/num_methods/binary_search.html}{\textbf{cp-algorithms.com}} \textemdash{} Binary Search (EN, detaliat, include și căutarea binară pe numere reale)
       \item \href{https://usaco.guide/silver/binary-search}{\textbf{usaco.guide}} \textemdash{} Binary Search on Monotonic Functions (EN)
       % \item \href{https://www.geeksforgeeks.org/dsa/binary-search/}{\textbf{geeksforgeeks.org}} \textemdash{} Binary Search (EN)
@@ -528,13 +529,15 @@ cout << rez;
       % \item \href{https://en.wikipedia.org/wiki/Binary_search}{\textbf{wikipedia.org}} \textemdash{} Binary search, istoric (EN)
     \end{itemize}
   \end{block}
+  \vspace{-6pt}
   \begin{block}{Documentație C++}
-    \begin{itemize}
+    \begin{itemize}\footnotesize\itemsep0pt
       \item \href{https://en.cppreference.com/w/cpp/algorithm/lower_bound.html}{\textbf{cppreference.com}} \textemdash{} \texttt{lower\_bound} / \texttt{upper\_bound}
     \end{itemize}
   \end{block}
+  \vspace{-6pt}
   \begin{block}{Fun fact}
-    \begin{itemize}
+    \begin{itemize}\footnotesize\itemsep0pt
       \item \href{https://cp-algorithms.com/num_methods/ternary_search.html}{\textbf{cp-algorithms.com}} \textemdash{} Ternary Search (EN) \textemdash{} căutare \textbf{ternară}, folosită pentru funcții unimodale (ex. $ax^2+bx+c$)
     \end{itemize}
   \end{block}
@@ -543,26 +546,29 @@ cout << rez;
 % ================================================================
 \section{Probleme de antrenament}
 
-\begin{frame}[shrink]{Probleme de antrenament}
+\begin{frame}{Probleme de antrenament}
   \begin{block}{Ușoare}
-    \begin{itemize}
+    \begin{itemize}\footnotesize\itemsep0pt
       \item \href{https://code.algolymp.com/problems/3963}{\textbf{Classic Binary Search \#3963}} {\footnotesize\textcolor{gray}{(AlgoCode)}}
       \item \href{https://code.algolymp.com/problems/4202}{\textbf{First Position Not Less Than Query \#4202}} {\footnotesize\textcolor{gray}{(AlgoCode)}}
     \end{itemize}
   \end{block}
+  \vspace{-4pt}
   \begin{block}{Medii}
-    \begin{itemize}
+    \begin{itemize}\footnotesize\itemsep0pt
       \item \href{https://code.algolymp.com/problems/1009}{\textbf{Search Task \#1009}} {\footnotesize\textcolor{gray}{(AlgoCode)}}
       \item \href{https://code.algolymp.com/problems/3962}{\textbf{Snack Route \#3962}} {\footnotesize\textcolor{gray}{(AlgoCode)}}
     \end{itemize}
   \end{block}
+  \vspace{-4pt}
   \begin{block}{Grea}
-    \begin{itemize}
+    \begin{itemize}\footnotesize\itemsep0pt
       \item \href{https://code.algolymp.com/problems/1008}{\textbf{Search Task \#1008}} {\footnotesize\textcolor{gray}{(AlgoCode)}}
     \end{itemize}
   \end{block}
+  \vspace{-4pt}
   \begin{block}{Olimpiadă}
-    \begin{itemize}
+    \begin{itemize}\footnotesize\itemsep0pt
       \item \href{https://code.algolymp.com/problems/1916}{\textbf{Buldo}} {\footnotesize\textcolor{gray}{(OJI 2020, clasa IX)}}
       \item \href{https://code.algolymp.com/problems/2984}{\textbf{Macarie}} {\footnotesize\textcolor{gray}{(OJI 2024, clasa IX)}}
     \end{itemize}
