@@ -10,7 +10,7 @@ Weekly lessons covering algorithms and data structures for 9th grade students.
 | [02](lessons/02-euclid-exponentiation/lesson.pdf) | Euclid's Algorithm / Fast exponentiation |
 | [03](lessons/03-number-systems-bitwise/lesson.pdf) | Number systems: Conversions / Memory representation / Bitwise operations |
 | [04](lessons/04-sorting-bubble-stl-counting/lesson.pdf) | Sorting algorithms: Bubble / Selection / Insertion / STL / Counting Sort |
-| 05 | Binary search |
+| [05](lessons/05-binary-search/lesson.pdf) | Binary search: Iterative & recursive search / STL (lower_bound, upper_bound) / Binary search on the answer |
 | 06 | Fibonacci sequence / Algorithm for determining the majority element |
 | 07 | Introduction to two-dimensional arrays: Traversals / Partitioning into zones |
 | 08 | Partial sums 1D/2D / Difference Arrays 1D/2D |
