@@ -1,6 +1,6 @@
 # Algolymp Summer School $-$ Clasa a IX-a
 
-Acest modul face parte din **Algolymp Summer School** și urmează [programa Olimpiadei Naționale de Informatică]([url](https://cdn.sepi.ro/oni2026/Programa_pentru_olimpiada_de_informatica_gimnaziu_si_liceu_2025-2026.pdf)) din România.
+Acest modul face parte din **Algolymp Summer School** și urmează [programa Olimpiadei Naționale de Informatică](https://cdn.sepi.ro/oni2026/Programa_pentru_olimpiada_de_informatica_gimnaziu_si_liceu_2025-2026.pdf) din România.
 ## Programa
 
 | # | Topic |
