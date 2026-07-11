@@ -1,7 +1,6 @@
-# Algolymp Summer School — Clasa a IX-a
+# Algolymp Summer School $-$ Clasa a IX-a
 
-Acest modul face parte din **Algolymp Summer School** și urmează programa Olimpiadei Naționale de Informatică din România. Dacă ești în clasa a IX-a și vrei să înveți tot ce ai nevoie pentru a participa la olimpiadă, acest curs e pentru tine! Acoperind toate temele, de la cele mai simple până la cele mai avansate, cursul te ghidează prin programă într-un mod logic și structurat. Dacă ești deja expert în temele prezentate, verifică grupele noastre de practică, unde poți rezolva probleme de dificultăți variate folosind algoritmii acoperiți.
-
+Acest modul face parte din **Algolymp Summer School** și urmează [programa Olimpiadei Naționale de Informatică]([url](https://cdn.sepi.ro/oni2026/Programa_pentru_olimpiada_de_informatica_gimnaziu_si_liceu_2025-2026.pdf)) din România.
 ## Programa
 
 | # | Topic |
