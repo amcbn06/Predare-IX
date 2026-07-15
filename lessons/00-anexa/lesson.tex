@@ -1,0 +1,361 @@
+\documentclass{beamer}
+\usetheme{metropolis}
+\usepackage{../../resources/style}
+
+\newcommand{\beginnote}[1]{%
+  \vfill
+  {\footnotesize\textcolor{gray}{\textit{$\triangleright$ #1 (vezi slide-ul \emph{Resurse})}}}%
+}
+
+\title{Anexă}
+\subtitle{Tipuri de date $\cdot$ Structuri de control $\cdot$ Fișiere text $\cdot$ Funcții $\cdot$ Recursivitate}
+\author{Andrei Mihai Ciobanu}
+\institute{Algolymp Summer School}
+\date{}
+\titlegraphic{\includegraphics[width=4cm]{../../resources/algolymp-logo.png}}
+\setbeamertemplate{frame footer}{Algolymp Summer School}
+
+% ----------------------------------------------------------------
+\begin{document}
+
+\begin{frame}[shrink]
+  \titlepage
+\end{frame}
+
+\begin{frame}{Cuprins}
+  \tableofcontents
+\end{frame}
+
+% ================================================================
+\section{Tipuri de date simple}
+
+\begin{frame}[fragile]{Tipuri de date simple}
+  \begin{center}
+  \begin{tabular}{llp{4.5cm}}
+    \toprule
+    Tip & Exemplu & Reprezintă \\
+    \midrule
+    \texttt{int, long long}    & \texttt{7}, \texttt{-3}       & numere întregi \\
+    \texttt{float,   double} & \texttt{3.14}, \texttt{-0.5}  & numere reale (cu zecimale) \\
+    \texttt{char}   & \texttt{'a'}, \texttt{'?'}    & un singur caracter \\
+    \texttt{bool}   & \texttt{true}, \texttt{false} & valoare logică \\
+    \bottomrule
+  \end{tabular}
+  \end{center}
+
+  \smallskip
+  \begin{lstlisting}
+int n = 7;
+double x = 3.14;
+char c = 'a';
+bool gasit = false;
+  \end{lstlisting}
+  \beginnote{tipuri simple de date}
+\end{frame}
+
+\begin{frame}{\texttt{int} vs.\ \texttt{long long}}
+  \begin{center}
+  \begin{tabular}{llr}
+    \toprule
+    Tip & Biți & Interval \\
+    \midrule
+    \texttt{int}                & 32 & $\approx \pm 2.1 \cdot 10^9$ \\
+    \texttt{unsigned int}       & 32 & $0\ \ldots\ \approx 4.3 \cdot 10^9$ \\
+    \texttt{long long}          & 64 & $\approx \pm 9.2 \cdot 10^{18}$ \\
+    \texttt{unsigned long long} & 64 & $0\ \ldots\ \approx 1.8 \cdot 10^{19}$ \\
+    \bottomrule
+  \end{tabular}
+  \end{center}
+
+  \smallskip
+  De obicei, dacă un calcul depășește $\approx 2 \cdot 10^9$, folosim \texttt{long long}. Variantele \texttt{unsigned} nu stochează valori negative. Limitele vin din reprezentarea în baza 2 \textemdash{} vezi \emph{Lecția 3}.
+
+  \vfill
+  {\footnotesize\textcolor{gray}{\textit{$\triangleright$ Fun fact: \texttt{float}/\texttt{double} sunt stocate după standardul IEEE~754 \textemdash{} de aceea \texttt{0.1 + 0.2 != 0.3} în orice limbaj de programare. \href{https://en.wikipedia.org/wiki/Floating-point_arithmetic\#IEEE_754:_floating_point_in_modern_computers}{Wikipedia: Floating-point arithmetic}}}}
+\end{frame}
+
+% ================================================================
+\section{Structuri de control}
+
+\begin{frame}[fragile]{Structura alternativă (\texttt{if}/\texttt{else})}
+  \begin{lstlisting}
+int x;
+cin >> x;
+
+if (x > 0) {
+    cout << "pozitiv";
+} else if (x < 0) {
+    cout << "negativ";
+} else {
+    cout << "zero";
+}
+  \end{lstlisting}
+  \begin{itemize}
+    \item Se execută un singur bloc, în funcție de condiție
+    \item \lstinline|else if| e opțional, poate apărea de mai multe ori
+    \item \lstinline|else| (fără condiție) e opțional, mereu la final
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Structura repetitivă (\texttt{for}, \texttt{while})}
+  \begin{lstlisting}
+// for: cand stim de la inceput cate repetari facem
+for (int i = 0; i < n; i++) {
+    cout << i << ' ';
+}
+
+// while: repetam cat timp e adevarata o conditie
+int i = 0;
+while (i < n) {
+    cout << i << ' ';
+    i++;
+}
+  \end{lstlisting}
+  Ambele bucle fac același lucru aici \textemdash{} alegem forma potrivită contextului.
+\end{frame}
+
+\begin{frame}[fragile]{Structura repetitivă (\texttt{do while})}
+  \textbf{Exemplu:} câte cifre are numărul $n$?
+
+  \begin{columns}[T]
+    \column{0.47\textwidth}
+    \begin{lstlisting}
+// while: n=0 => cifre=0
+int cifre = 0;
+while (n > 0) {
+    cifre++;
+    n /= 10;
+}
+    \end{lstlisting}
+    \column{0.47\textwidth}
+    \begin{lstlisting}
+// do while: pt n=0 => cifre=1
+int cifre = 0;
+do {
+    cifre++;
+    n /= 10;
+} while (n > 0);
+    \end{lstlisting}
+  \end{columns}
+
+  \begin{itemize}
+    \item Corpul se execută \textbf{cel puțin o dată}, indiferent de condiție
+    \item Alternativă la \lstinline|while|: un \lstinline|if (n == 0)  cifre = 1;| înaintea buclei
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{\texttt{break} și \texttt{continue}}
+  \begin{lstlisting}
+for (int i = 0; i < 10; i++) {
+    if (i == 3) continue; // sare la urmatoarea iteratie
+    if (i == 7) break;    // iese din bucla
+    cout << i << ' ';
+}
+// afiseaza: 0 1 2 4 5 6
+  \end{lstlisting}
+  \begin{itemize}
+    \item \lstinline|continue| \textemdash{} sare la următoarea iterație, fără a executa restul corpului
+    \item \lstinline|break| \textemdash{} iese din buclă imediat, indiferent de condiție
+    \item Funcționează în \lstinline|for|, \lstinline|while| și \lstinline|do while|
+  \end{itemize}
+\end{frame}
+
+% ================================================================
+\section{Fișiere text}
+
+\begin{frame}{De ce fișiere text?}
+  \begin{block}{Context}
+    La majoritatea problemelor de olimpiadă (OJI, pbinfo, infoarena), datele se citesc dintr-un fișier \texttt{.in} și rezultatul se scrie într-un fișier \texttt{.out}, nu în consolă.
+  \end{block}
+
+  \smallskip
+  \begin{itemize}
+    \item Citire: \texttt{ifstream} (\emph{input file stream})
+    \item Scriere: \texttt{ofstream} (\emph{output file stream})
+    \item Se folosesc la fel ca \texttt{cin}/\texttt{cout}, doar că lucrează cu un fișier în loc de consolă
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{\texttt{ifstream} / \texttt{ofstream}}
+  \begin{lstlisting}
+#include <fstream>
+using namespace std;
+
+int main() {
+    ifstream fin("date.in");
+    ofstream fout("date.out");
+    int a, b;
+    fin >> a >> b;
+    fout << a + b;
+    return 0;
+}
+  \end{lstlisting}
+  \begin{itemize}
+    \item \lstinline|fin >> a >> b;| citește la fel ca \lstinline|cin|
+    \item \lstinline|fout << ...;| scrie la fel ca \lstinline|cout|
+    \item Fișierele se închid automat la finalul programului
+  \end{itemize}
+\end{frame}
+
+% ================================================================
+\section{Funcții}
+
+\begin{frame}[shrink]{De ce folosim funcții?}
+  Până acum am scris tot codul direct în \texttt{main}. Pe măsură ce problemele devin mai complexe, avem nevoie să \textbf{organizăm} codul.
+
+  \begin{block}{O funcție:}
+    \begin{itemize}
+      \item are un \textbf{nume}
+      \item primește (opțional) \textbf{parametri}
+      \item execută o secvență de instrucțiuni
+      \item poate \textbf{întoarce} un rezultat (sau nu, dacă e \texttt{void})
+    \end{itemize}
+  \end{block}
+
+  \smallskip
+  \begin{block}{Avantaje:}
+    \begin{itemize}
+      \item \textbf{Reutilizare:} scriem logica o singură dată, o folosim de câte ori avem nevoie
+      \item \textbf{Claritate:} codul din \texttt{main} devine mai ușor de citit
+      \item \textbf{Testare:} putem verifica fiecare funcție separat
+    \end{itemize}
+  \end{block}
+\end{frame}
+
+\begin{frame}[fragile]{Declarare, definire, apel}
+  \begin{lstlisting}
+// declarare + definire: tip, nume, parametri
+int suma(int a, int b) {
+    return a + b;
+}
+
+int main() {
+    int x = 3, y = 5;
+    int rez = suma(x, y); // apel
+    cout << rez;          // afiseaza 8
+    return 0;
+}
+  \end{lstlisting}
+  \begin{itemize}
+    \item Tipul din fața numelui = tipul valorii întoarse (\texttt{int}, \texttt{bool}, \texttt{void}, \dots)
+    \item O funcție trebuie declarată \textbf{înainte} să fie folosită
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Variabile locale și variabile globale}
+  \begin{lstlisting}
+int contor = 0; // variabila globala, vizibila peste tot
+
+void incrementeaza() {
+    int pas = 1;   // variabila locala, doar in aceasta functie
+    contor += pas;
+}
+
+int main() {
+    incrementeaza();
+    incrementeaza();
+    cout << contor; // afiseaza 2
+    return 0;
+}
+  \end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]{Parametri prin valoare vs. prin referință}
+  \begin{lstlisting}
+void prinValoare(int x) {
+    x = x + 10; // modifica doar copia locala
+}
+
+void prinReferinta(int &x) {
+    x = x + 10; // modifica variabila originala
+}
+
+int main() {
+    int a = 5, b = 5;
+    prinValoare(a);
+    prinReferinta(b);
+    cout << a << ' ' << b; // afiseaza 5 15
+    return 0;
+}
+  \end{lstlisting}
+  \lstinline|int &x| primește \textbf{aceeași variabilă}, nu o copie.
+\end{frame}
+
+% ================================================================
+\section{Recursivitate}
+
+\begin{frame}{Ce este recursivitatea?}
+  \begin{block}{Definiție}
+    O funcție este \textbf{recursivă} dacă se apelează pe ea însăși.
+  \end{block}
+
+  \smallskip
+  Orice funcție recursivă are nevoie de:
+  \begin{itemize}
+    \item Un \textbf{caz de bază} \textemdash{} condiția de oprire (altfel rulează la infinit)
+    \item Un \textbf{apel recursiv} pe o subproblemă mai mică
+  \end{itemize}
+
+  \smallskip
+  Exemplu: $n! = n \cdot (n-1)!$, cu cazul de bază $0! = 1$
+
+  \vfill
+  {\footnotesize\textcolor{gray}{\textit{$\triangleright$ Recursivitate \textemdash{} reluăm și aprofundăm la \emph{Lecția 2} (Algoritmul lui Euclid)}}}
+\end{frame}
+
+\begin{frame}[fragile]{Un prim exemplu: factorial}
+  \begin{lstlisting}
+long long factorial(int n) {
+    if (n == 0) {
+        return 1;         // caz de baza
+    }
+    return n * factorial(n - 1); // apel recursiv
+}
+  \end{lstlisting}
+  \begin{itemize}
+    \item \lstinline|factorial(4)| apelează \lstinline|factorial(3)|, care apelează \lstinline|factorial(2)|, \dots până la \lstinline|factorial(0)|
+    \item Fiecare apel așteaptă rezultatul celui următor, apoi înmulțește
+    \item Vom relua ideea, cu mai multe exemple, la \emph{Lecția 2} (Algoritmul lui Euclid)
+  \end{itemize}
+\end{frame}
+
+% ================================================================
+\section{Resurse}
+
+\begin{frame}{Resurse (1)}
+  \begin{block}{Tipuri de date}
+    \begin{itemize}\footnotesize\itemsep0pt
+      \item \href{https://www.pbinfo.ro/articole/58/tipuri-de-date-c-c}{\textbf{pbinfo.ro}} \textemdash{} Tipuri de date C/C++ (RO)
+      \item \href{https://www.pbinfo.ro/articole/60/intrari-iesiri-in-cpp}{\textbf{pbinfo.ro}} \textemdash{} Intrări-ieșiri în C++ (RO)
+      \item \href{https://www.pbinfo.ro/articole/68/structura-liniara}{\textbf{pbinfo.ro}} \textemdash{} Structura liniară (RO)
+      \item \href{https://en.wikipedia.org/wiki/Floating-point_arithmetic\#IEEE_754:_floating_point_in_modern_computers}{\textbf{Wikipedia}} \textemdash{} Floating-point arithmetic \textemdash{} IEEE~754 (EN)
+    \end{itemize}
+  \end{block}
+  \vspace{-6pt}
+  \begin{block}{Structuri de control}
+    \begin{itemize}\footnotesize\itemsep0pt
+      \item \href{https://www.pbinfo.ro/articole/70/structuri-alternative}{\textbf{pbinfo.ro}} \textemdash{} Structuri alternative (RO)
+      \item \href{https://www.pbinfo.ro/articole/71/structuri-repetitive}{\textbf{pbinfo.ro}} \textemdash{} Structuri repetitive (RO)
+    \end{itemize}
+  \end{block}
+\end{frame}
+
+\begin{frame}{Resurse (2)}
+  \begin{block}{Fișiere text}
+    \begin{itemize}\footnotesize\itemsep0pt
+      \item \href{https://www.pbinfo.ro/articole/19047/operatii-de-intrare-iesire-cu-fisiere-in-cpp}{\textbf{pbinfo.ro}} \textemdash{} Operații de I/O cu fișiere în C++ (RO)
+      \item \href{https://www.pbinfo.ro/articole/2673/fisiere-text}{\textbf{pbinfo.ro}} \textemdash{} Fișiere text (RO)
+      \item \href{https://www.geeksforgeeks.org/cpp/file-handling-through-c-classes/}{\textbf{geeksforgeeks.org}} \textemdash{} File Handling through C++ Classes (EN)
+    \end{itemize}
+  \end{block}
+  \vspace{-6pt}
+  \begin{block}{Funcții \textbar\ Recursivitate}
+    \begin{itemize}\footnotesize\itemsep0pt
+      \item \href{https://www.pbinfo.ro/articole/3656/subprograme}{\textbf{pbinfo.ro}} \textemdash{} Subprograme (RO)
+      \item \href{https://www.pbinfo.ro/articole/3664/definirea-si-declararea-unei-functii-c-c}{\textbf{pbinfo.ro}} \textemdash{} Definirea și declararea unei funcții C/C++ (RO)
+      \item \href{https://www.pbinfo.ro/articole/3873/recursivitate}{\textbf{pbinfo.ro}} \textemdash{} Recursivitate (RO)
+    \end{itemize}
+  \end{block}
+\end{frame}
+
+\end{document}
