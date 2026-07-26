@@ -17,7 +17,7 @@ Acest modul face parte din **Algolymp Summer School** și urmează [programa Oli
 | 09 | **Interclasarea tablourilor \| Tehnica Two Pointers**<br>Operații cu mulțimi · Sliding Window |
 | 10 | **Tipuri de date non-omogene**<br>Tipul struct · Structuri de date din STL |
 | 11 | **Algoritmi Greedy**<br>Problema spectacolelor · Diverse probleme |
-| 12 | **Funcția Möbius \| Principiul includerii și excluderii** |
+| 12 | **Indicatorul lui Euler \| Funcția Möbius \| Principiul includerii și excluderii** |
 | 13 | **Backtracking**<br> Generarea elementelor combinatoriale |
 | 14 | **Simulare OJI** |
 
