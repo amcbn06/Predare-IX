@@ -12,7 +12,7 @@ Acest modul face parte din **Algolymp Summer School** și urmează [programa Oli
 | [04](lessons/04-sorting-bubble-stl-counting/lesson.pdf) | **Algoritmi de sortare**<br>Bubble · Selection · Insertion · STL · Counting Sort |
 | [05](lessons/05-binary-search/lesson.pdf) | **Căutare binară**<br>Varianta clasică · Variații · STL · Complexitate · Căutare binară pe rezultat |
 | [06](lessons/06-fibonacci-majority-kadane/lesson.pdf) | **Șirul lui Fibonacci \| Algoritmi pe șiruri**<br>Elementul majoritar · Subsecvența de sumă maximă |
-| 07 | **Tablouri bidimensionale**<br>Parcurgeri · Împărțirea în zone · Simulări |
+| [07](lessons/07-2d-arrays/lesson.pdf) | **Tablouri bidimensionale**<br>Parcurgeri · Împărțirea în zone · Simulări |
 | 08 | **Sume parțiale și șmenul lui Mars**<br>Pe șiruri (1D) · Pe matrici (2D) |
 | 09 | **Interclasarea tablourilor \| Tehnica Two Pointers**<br>Operații cu mulțimi · Sliding Window |
 | 10 | **Tipuri de date non-omogene**<br>Tipul struct · Structuri de date din STL |
