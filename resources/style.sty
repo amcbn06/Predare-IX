@@ -47,6 +47,13 @@
 \usepackage{booktabs}
 \usepackage{array}
 
+% --- Beamer colors ---
+\makeatletter
+\@ifclassloaded{beamer}{%
+  \setbeamercolor{alerted text}{fg=red}
+}{}
+\makeatother
+
 % --- Beamer font & spacing fixes ---
 \makeatletter
 \@ifclassloaded{beamer}{%
