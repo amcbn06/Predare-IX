@@ -15,6 +15,7 @@
 \institute{Algolymp Summer School}
 \date{}
 \titlegraphic{\includegraphics[width=4cm]{../../resources/algolymp-logo.png}}
+\setbeamercolor{alerted text}{fg=red!70!black}
 \setbeamertemplate{frame footer}{Algolymp Summer School}
 
 % ----------------------------------------------------------------
@@ -64,7 +65,7 @@
   \end{itemize}
 
   \smallskip
-  \textbf{Exemplu:} $a = [1,\ 3,\ 5]$, $b = [2,\ 4,\ 6]$:
+  \textbf{Exemplu:} $a = [1,\ 3,\ 5,\ 8]$, $b = [2,\ 4,\ 6,\ 7]$:
 
   \begin{center}
   \begin{tikzpicture}
@@ -73,9 +74,9 @@
                  align=center, font=\small, execute at begin node={\vphantom{0}}},
           row sep=3pt, column sep=2pt] {
     |[font=\small\bfseries]| $a$
-      \& |[fill=orange!40]| 1 \& |[fill=blue!15]| 3 \& |[fill=blue!15]| 5 \\
+      \& |[fill=orange!40]| 1 \& |[fill=blue!15]| 3 \& |[fill=blue!15]| 5 \& |[fill=blue!15]| 8 \\
     |[font=\small\bfseries]| $b$
-      \& |[fill=blue!30]| 2 \& |[fill=blue!15]| 4 \& |[fill=blue!15]| 6 \\
+      \& |[fill=blue!30]| 2 \& |[fill=blue!15]| 4 \& |[fill=blue!15]| 6 \& |[fill=blue!15]| 7 \\
   };
   \end{tikzpicture}
 
@@ -88,7 +89,8 @@
           row sep=2pt, column sep=2pt] {
     |[font=\small\bfseries]| $c$
       \& |[fill=green!25]| 1 \& |[fill=green!25]| 2 \& |[fill=green!25]| 3
-      \& |[fill=green!25]| 4 \& |[fill=green!25]| 5 \& |[fill=green!25]| 6 \\
+      \& |[fill=green!25]| 4 \& |[fill=green!25]| 5 \& |[fill=green!25]| 6
+      \& |[fill=green!25]| 7 \& |[fill=green!25]| 8 \\
   };
   \end{tikzpicture}
   \end{center}
@@ -422,8 +424,8 @@ for (int l = 1, r = 0; l <= n; ++l) {
 % ================================================================
 \section{Sliding Window}
 
-\begin{frame}{Fereastră fixă}
-  \textbf{Sliding Window fix}: fereastra are mereu exact $k$ elemente consecutive.
+\begin{frame}{Sliding Window}
+  \textbf{Sliding Window}: fereastra are mereu exact $k$ elemente consecutive.
 
   \begin{block}{Exemplu}
     Suma maximă a $k$ elemente consecutive din $a[1 \ldots n]$.
@@ -439,7 +441,7 @@ for (int l = 1, r = 0; l <= n; ++l) {
   Fiecare element e adăugat și scos o singură dată $\Rightarrow$ $O(n)$.
 \end{frame}
 
-\begin{frame}[fragile, shrink]{Implementare \textemdash{} Fereastră fixă}
+\begin{frame}[fragile, shrink]{Implementare \textemdash{} Sliding Window}
   \begin{lstlisting}
 const int nmax = 100000;
 int a[nmax + 1];
@@ -473,7 +475,7 @@ for (int r = k + 1; r <= n; r++) {
     Operații cu mulțimi    & $O(n+m)$ & ambii sortați \\
     Pointeri din capete      & $O(n)$   & vector sortat \\
     Pointeri în același sens & $O(n)$   & elemente pozitive \\
-    Sliding Window fix     & $O(n)$   & \textemdash{} \\
+    Sliding Window     & $O(n)$   & \textemdash{} \\
     \bottomrule
   \end{tabular}
   \end{center}
@@ -492,6 +494,7 @@ for (int r = k + 1; r <= n; r++) {
     \item \href{https://old.algogenius.ro/two-pointers/}{\textbf{AlgoGenius}} \textemdash{} Tehnica Two Pointers (RO)
     \item \href{https://usaco.guide/silver/two-pointers?lang=cpp}{\textbf{USACO Guide}} \textemdash{} Two Pointers (EN)
     \item \href{https://cdn.sepi.ro/infobits-f1.pdf}{\textbf{Infobits Academy F1}} \textemdash{} p. 79 (RO)
+    \item \href{https://cses.fi/book/book.pdf}{\textbf{Competitive Programmer's Handbook}} \textemdash{} cap. 8 (EN)
   \end{itemize}
 \end{frame}
 
@@ -508,7 +511,7 @@ for (int r = k + 1; r <= n; r++) {
   \end{block}
 \end{frame}
 
-\begin{frame}{Probleme de antrenament \textemdash{} Two Pointers \& Sliding Window}
+\begin{frame}{Probleme de antrenament \textemdash{} Two Pointers}
   \begin{enumerate}\footnotesize\itemsep2pt
     \item \href{https://code.algolymp.com/problems/4277}{\textbf{Pair Sum Window Count}}
           \textcolor{gray}{(AlgoCode \#4277)}

@@ -14,7 +14,7 @@ Acest modul face parte din **Algolymp Summer School** și urmează [programa Oli
 | [06](lessons/06-fibonacci-majority-kadane/lesson.pdf) | **Șirul lui Fibonacci \| Algoritmi pe șiruri**<br>Elementul majoritar · Subsecvența de sumă maximă |
 | [07](lessons/07-2d-arrays/lesson.pdf) | **Tablouri bidimensionale**<br>Parcurgeri · Împărțirea în zone · Simulări |
 | [08](lessons/08-prefix-sums-difference-arrays/lesson.pdf) | **Sume parțiale și șmenul lui Mars**<br>Pe șiruri (1D) · Pe matrici (2D) |
-| 09 | **Interclasarea tablourilor \| Tehnica Two Pointers**<br>Operații cu mulțimi · Sliding Window |
+| [09](lessons/09-merging-two-pointers/lesson.pdf) | **Interclasarea tablourilor \| Tehnica Two Pointers**<br>Operații cu mulțimi · Sliding Window |
 | 10 | **Tipuri de date non-omogene**<br>Tipul struct · Structuri de date din STL |
 | 11 | **Algoritmi Greedy**<br>Problema spectacolelor · Diverse probleme |
 | 12 | **Indicatorul lui Euler \| Funcția Möbius \| Principiul includerii și excluderii** |
