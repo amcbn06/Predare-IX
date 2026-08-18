@@ -1,0 +1,119 @@
+\ProvidesPackage{algolymp-dense}
+% Algolymp Dense Theme — lot juniori / lot seniori
+% Bază: Metropolis (identic structural, paletă Charcoal + Emerald)
+% Usage: \usepackage{../../resources/themes/algolymp-dense}
+% NU apela \usetheme{} în document.
+% Documentclass recomandat: \documentclass[10pt]{beamer}
+
+% ============================================================
+% Pachete utilitare
+% ============================================================
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[romanian,english]{babel}
+\usepackage{amsmath,amssymb,mathtools}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{graphicx}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning,shapes,calc,decorations.pathreplacing,quotes,fit}
+\usepackage{booktabs,array,multirow}
+
+% ============================================================
+% Paletă Charcoal + Emerald
+% ============================================================
+\definecolor{advPrimary} {RGB}{44,  44,  44}   % charcoal
+\definecolor{advAccent}  {RGB}{45,  122, 79}   % emerald
+\definecolor{advAlert}   {RGB}{180, 50,  20}   % portocaliu-roșu
+\definecolor{codebg}     {RGB}{238, 238, 238}
+\definecolor{codecomment}{RGB}{90,  90,  90}
+\definecolor{codekeyword}{RGB}{44,  44,  44}
+\definecolor{codestring} {RGB}{45,  122, 79}
+
+% ============================================================
+% C++ listings
+% ============================================================
+\lstset{
+  backgroundcolor=\color{codebg},
+  basicstyle=\ttfamily\scriptsize,
+  keywordstyle=\color{codekeyword}\bfseries,
+  commentstyle=\color{codecomment}\itshape,
+  stringstyle=\color{codestring},
+  numbers=left, numberstyle=\tiny\color{gray}, numbersep=5pt, stepnumber=1,
+  showspaces=false, showstringspaces=false,
+  breaklines=true, columns=flexible, frame=single, rulecolor=\color{gray!30},
+  captionpos=b, language=C++, tabsize=2,
+  morekeywords={vector,pair,map,set,queue,stack,priority_queue,auto,int64_t,ll,pll,pli}
+}
+
+% ============================================================
+% Setări Beamer
+% ============================================================
+\makeatletter
+\@ifclassloaded{beamer}{%
+
+  % Metropolis ca bază
+  \usetheme{metropolis}
+
+  % Margini mai strânse (Metropolis default = 2.2em, prea înguste pentru conținut dens)
+  \setbeamersize{text margin left=1.3em, text margin right=1.3em}
+
+  % Padding frametitle mai compact (Metropolis default = 2.2ex per side)
+  \setlength{\metropolis@frametitle@padding}{1.4ex}
+
+  % Culori — overlay peste Metropolis
+  \AtBeginDocument{%
+    % Culoarea primară: charcoal în loc de teal implicit
+    \setbeamercolor{palette primary}   {bg=advPrimary,         fg=white}%
+    \setbeamercolor{normal text}       {fg=black!90,           bg=white}%
+    % Block obișnuit
+    \setbeamercolor{block title}       {bg=advPrimary!12,      fg=advPrimary}%
+    \setbeamercolor{block body}        {bg=advPrimary!4,       fg=black}%
+    % Alertblock — emerald (accent) în loc de portocaliu Metropolis
+    \setbeamercolor{alerted text}      {fg=advAccent}%
+    \setbeamercolor{block title alerted}{bg=advAccent!18,      fg=advAccent!70!black}%
+    \setbeamercolor{block body alerted} {bg=advAccent!7,       fg=black}%
+    % Exampleblock
+    \setbeamercolor{block title example}{bg=advAccent!20,      fg=advAccent!70!black}%
+    \setbeamercolor{block body example} {bg=advAccent!8,       fg=black}%
+    % Progress bar: emerald
+    \setbeamercolor{progress bar}      {fg=advAccent,          bg=advPrimary!50!black!30}%
+  }
+
+  % Fonturi (mai mici — conținut dens)
+  \setbeamerfont{block body}                {size=\small}
+  \setbeamerfont{block title}               {size=\small,      series=\bfseries}
+  \setbeamerfont{itemize/enumerate body}    {size=\small}
+  \setbeamerfont{itemize/enumerate subbody} {size=\footnotesize}
+
+  % Spațiere compactă
+  \setlength{\leftmargini}{1.2em}
+  \setlength{\leftmarginii}{1em}
+  \setlength{\itemsep}{1pt}
+  \setlength{\parskip}{0pt}
+
+  % Spațiere built-in după titlul blocurilor
+  \addtobeamertemplate{block begin}{}{\smallskip}
+  \addtobeamertemplate{block alerted begin}{}{\smallskip}
+  \addtobeamertemplate{block example begin}{}{\smallskip}
+
+  % Macro \beginnote
+  \newcommand{\beginnote}[1]{%
+    \vfill
+    {\footnotesize\textcolor{gray}{\itshape $\triangleright$ #1}}%
+  }
+
+  % TikZ styles pentru grafuri
+  \tikzset{
+    nd/.style={circle,draw=advPrimary,fill=advPrimary!8,thick,minimum size=9mm,
+               font=\small\bfseries\color{advPrimary}},
+    src/.style={nd,fill=advAccent!25,draw=advAccent,text=black},
+    snk/.style={nd,fill=advPrimary!25},
+    eg/.style={->,>=Stealth,thick,draw=advPrimary},
+    eghigh/.style={->,>=Stealth,very thick,draw=advAccent},
+    egres/.style={->,>=Stealth,dashed,thick,draw=gray!55},
+    elbl/.style={font=\tiny,fill=white,inner sep=1pt,text=black}
+  }
+
+}{}
+\makeatother

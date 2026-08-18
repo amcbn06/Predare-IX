@@ -1,0 +1,134 @@
+\ProvidesPackage{algolymp-webinar}
+% Algolymp Webinar Theme — sesiuni de disectat și rezolvat probleme
+% Bază: Metropolis (identic structural, paletă Navy + Amber)
+% Usage: \usepackage{../../resources/themes/algolymp-webinar}
+% NU apela \usetheme{} în document.
+
+% ============================================================
+% Pachete utilitare
+% ============================================================
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[romanian,english]{babel}
+\usepackage{amsmath,amssymb}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{graphicx}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning,shapes,calc}
+\usepackage{booktabs,array}
+
+% ============================================================
+% Paletă Navy + Amber
+% ============================================================
+\definecolor{wbPrimary} {RGB}{26,  50,  80}   % navy
+\definecolor{wbAccent}  {RGB}{230, 160, 32}   % amber
+\definecolor{wbAlert}   {RGB}{180, 30,  30}   % roșu închis
+\definecolor{wbGreen}   {RGB}{40,  130, 80}   % verde (enunțuri probleme)
+\definecolor{codebg}    {RGB}{245, 245, 245}
+\definecolor{codecomment}{RGB}{100,100,100}
+\definecolor{codekeyword}{RGB}{0,  0,   180}
+\definecolor{codestring} {RGB}{163,21,  21}
+
+% ============================================================
+% C++ listings
+% ============================================================
+\lstset{
+  backgroundcolor=\color{codebg},
+  basicstyle=\ttfamily\scriptsize,
+  keywordstyle=\color{codekeyword}\bfseries,
+  commentstyle=\color{codecomment}\itshape,
+  stringstyle=\color{codestring},
+  numbers=left,
+  numberstyle=\tiny\color{gray},
+  stepnumber=1, numbersep=8pt,
+  showspaces=false, showstringspaces=false,
+  breaklines=true,
+  frame=single, rulecolor=\color{gray!40},
+  captionpos=b,
+  language=C++, tabsize=4,
+  morekeywords={vector,pair,map,set,queue,stack,priority_queue,auto,int64_t,ll}
+}
+
+% ============================================================
+% Setări Beamer
+% ============================================================
+\makeatletter
+\@ifclassloaded{beamer}{%
+
+  % Metropolis ca bază
+  \usetheme{metropolis}
+
+  % Margini mai strânse (Metropolis default = 2.2em, prea înguste pentru conținut dens)
+  \setbeamersize{text margin left=1.3em, text margin right=1.3em}
+
+  % Padding frametitle mai compact (Metropolis default = 2.2ex per side)
+  \setlength{\metropolis@frametitle@padding}{1.4ex}
+
+  % Culori — overlay peste Metropolis
+  \AtBeginDocument{%
+    % Culoarea primară: navy în loc de teal implicit
+    \setbeamercolor{palette primary}    {bg=wbPrimary,         fg=white}%
+    \setbeamercolor{normal text}        {fg=black!90,          bg=white}%
+    % Block obișnuit — idei, soluție
+    \setbeamercolor{block title}        {bg=wbPrimary!12,      fg=wbPrimary}%
+    \setbeamercolor{block body}         {bg=wbPrimary!5,       fg=black}%
+    % Alertblock — capcane, greșeli
+    \setbeamercolor{alerted text}       {fg=wbAlert}%
+    \setbeamercolor{block title alerted}{use=block title, fg=wbAlert, bg=block title.bg}%
+    \setbeamercolor{block body alerted} {use=block body,  bg=block body.bg}%
+    % Exampleblock — enunțul problemei (verde)
+    \setbeamercolor{block title example}{bg=wbGreen!18,        fg=wbGreen!80!black}%
+    \setbeamercolor{block body example} {bg=wbGreen!6,         fg=black}%
+    % Progress bar: amber
+    \setbeamercolor{progress bar}       {fg=wbAccent,          bg=wbPrimary!50!black!30}%
+  }
+
+  % Fonturi uniforme în blocuri și liste
+  \setbeamerfont{block body}                {size=\normalsize}
+  \setbeamerfont{block title}               {size=\normalsize, series=\bfseries}
+  \setbeamerfont{itemize/enumerate body}    {size=\normalsize}
+  \setbeamerfont{itemize/enumerate subbody} {size=\normalsize}
+
+  % Spațiere
+  \setlength{\leftmargini}{1.2em}
+  \setlength{\leftmarginii}{1em}
+  \setlength{\itemsep}{2pt}
+  \setlength{\parskip}{0pt}
+
+  % Spațiere built-in după titlul blocurilor
+  \addtobeamertemplate{block begin}{}{\smallskip}
+  \addtobeamertemplate{block alerted begin}{}{\smallskip}
+  \addtobeamertemplate{block example begin}{}{\smallskip}
+
+  % Macro \beginnote
+  \newcommand{\beginnote}[1]{%
+    \vfill
+    {\footnotesize\textcolor{gray}{\itshape $\triangleright$ #1}}%
+  }
+
+  % Subtitlu pentru slide-urile de secțiune.
+  % Folosire: \renewcommand{\sectionsubtitle}{text} imediat înainte de \section{}
+  \newcommand{\sectionsubtitle}{}
+  \setbeamertemplate{section page}{%
+    \centering
+    \begin{minipage}{22em}%
+      \raggedright
+      \usebeamercolor[fg]{section title}%
+      \usebeamerfont{section title}%
+      \insertsectionhead\\[-1ex]%
+      \usebeamertemplate*{progress bar in section page}%
+      \par
+      \ifx\sectionsubtitle\empty\else%
+        \smallskip
+        \usebeamercolor[fg]{section title}%
+        \usebeamerfont{subtitle}%
+        \sectionsubtitle%
+      \fi%
+    \end{minipage}%
+    \par
+    \vspace{\baselineskip}%
+  }
+
+}{}
+\makeatother

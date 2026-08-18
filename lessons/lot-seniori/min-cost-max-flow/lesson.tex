@@ -1,0 +1,1249 @@
+﻿\documentclass[9pt]{beamer}
+\usepackage{../../../resources/style-adv-04}
+
+\title{Flux de Cost Minim}
+\subtitle{Flux Maxim de Cost Minim --- Lot Seniori}
+\author{Andrei Mihai Ciobanu}
+\institute{Algolymp Summer School}
+\date{}
+\titlegraphic{\includegraphics[width=3cm]{../../../resources/algolymp-logo.png}}
+\setbeamertemplate{frame footer}{Algolymp --- Lot Seniori}
+
+% ---- TikZ: stiluri pentru diagrame de retea ----
+\tikzset{
+  nd/.style={circle,draw=advPrimary,fill=advPrimary!8,thick,
+             minimum size=10mm,font=\small\bfseries\color{advPrimary}},
+  src/.style={nd,fill=advAccent!25,draw=advAccent!80!black,text=black},
+  snk/.style={nd,fill=advPrimary!35,text=white},
+  eg/.style={->,>=Stealth,thick,draw=advPrimary},
+  eghigh/.style={->,>=Stealth,line width=2pt,draw=advAccent},
+  egsat/.style={->,>=Stealth,thick,draw=red!60,dashed},
+  egres/.style={->,>=Stealth,dashed,thick,draw=gray!60},
+  elbl/.style={font=\scriptsize,fill=white,inner sep=2pt,text=black},
+  dlbl/.style={font=\tiny\bfseries,text=advAccent}
+}
+
+% ---- Prescurtari matematice ----
+\newcommand{\capop}{\operatorname{cap}}
+\newcommand{\cost}{\operatorname{cost}}
+\newcommand{\dist}{\operatorname{dist}}
+\newcommand{\cbar}{\bar{c}}
+
+% ================================================================
+\begin{document}
+
+\begin{frame}
+  \titlepage
+\end{frame}
+
+\begin{frame}{Cuprins}
+  \tableofcontents
+\end{frame}
+
+% ================================================================
+\section{Problema si Reteaua Reziduala}
+
+\begin{frame}[shrink]{De ce avem nevoie de flux de cost minim?}
+  \begin{columns}[T]
+  \column{0.50\textwidth}
+    \begin{block}{Problema transportului}
+      Avem fabrici cu stocuri si depozite cu cereri.
+      Fiecare drum are un \alert{cost per unitate transportata}.
+      Vrem sa satisfacem toate cererile cu \alert{cost total minim}.
+    \end{block}
+    \smallskip
+    \begin{block}{Assignment / Matching ponderat}
+      $n$ lucratori, $m$ sarcini, cost $c_{ij}$ pentru $i \to j$.
+      Gasiti asignarea de cost minim.
+      Caz special direct al FMCM.
+    \end{block}
+  \column{0.48\textwidth}
+    \begin{exampleblock}{Exemple clasice}
+      \begin{footnotesize}
+      \begin{itemize}
+        \item Rutare trafic de retea cu costuri de latenta
+        \item Problema cuplajului bipartit ponderat
+        \item Problema $k$ drumuri de cost minim
+        \item Earth Mover's Distance (Wasserstein)
+        \item Scheduling cu deadlines si penalitati
+      \end{itemize}
+      \end{footnotesize}
+    \end{exampleblock}
+    \begin{alertblock}{Mesaj cheie}
+      \footnotesize
+      FMCM generalizeaza: cel mai scurt drum, flux maxim,
+      assignment, matching \textemdash{} toate sunt cazuri speciale.
+    \end{alertblock}
+  \end{columns}
+\end{frame}
+
+\begin{frame}[shrink]{Formularea formala a problemei}
+  \begin{block}{Input}
+    Graf orientat $G=(V,E)$, sursa $s$, destinatie $t$.
+    Fiecare muchie $(u,v)\in E$ are capacitate $\capop(u,v)>0$ si cost $c(u,v)\in\mathbb{R}$.
+  \end{block}
+  \begin{block}{Obiectiv: flux maxim de cost minim}
+    Gasiti fluxul $f:E\to\mathbb{R}_{\geq 0}$ cu $|f|$ \textbf{maxim} si \textbf{cost total minim}:
+    \[
+      \min \;\sum_{(u,v)\in E} c(u,v)\cdot f(u,v)
+    \]
+    \textbf{Cu conditiile:}
+    \begin{enumerate}\footnotesize
+      \item \textbf{Capacitate:} $0\leq f(u,v)\leq\capop(u,v)$ pentru orice $(u,v)\in E$
+      \item \textbf{Conservare:} $\sum_w f(u,w)=\sum_w f(w,u)$ pentru orice $u\neq s,t$
+    \end{enumerate}
+  \end{block}
+  \begin{alertblock}{Varianta alternativa: flux de valoare $K$, cost minim}
+    Gasiti fluxul de valoare \textbf{exact} $K$ cu cost minim (nu neaparat maxim).
+    Util cand cerem o cantitate fixa: opriti algoritmul dupa ce $|f|=K$.
+  \end{alertblock}
+  \begin{block}{\alert{Preconditie esentiala}}
+    \footnotesize
+    Graful initial $G$ \textbf{nu trebuie sa contina cicluri de cost negativ}.
+    Daca exista un ciclu cu cost total $<0$, putem trimite flux arbitrar de mare pe el,
+    scazand costul la $-\infty$ \textemdash{} problema devine nerezolvabila.
+  \end{block}
+\end{frame}
+
+\begin{frame}[shrink]{Exemplul de lucru}
+  \begin{center}
+  \vspace{-6pt}
+  \begin{tikzpicture}[scale=0.72]
+    \node[src] (S) at (0,0)   {S};
+    \node[nd]  (A) at (4.5,2) {A};
+    \node[nd]  (B) at (4.5,-2){B};
+    \node[snk] (T) at (9,0)   {T};
+
+    \draw[eg] (S) to node[elbl,above left]  {$\mathbf{4}$ / \textit{1}} (A);
+    \draw[eg] (S) to node[elbl,below left]  {$\mathbf{2}$ / \textit{3}} (B);
+    \draw[eg] (A) to node[elbl,above right] {$\mathbf{3}$ / \textit{2}} (T);
+    \draw[eg] (B) to node[elbl,below right] {$\mathbf{3}$ / \textit{1}} (T);
+    \draw[eg] (A) to node[elbl,right]       {$\mathbf{2}$ / \textit{1}} (B);
+  \end{tikzpicture}
+  \end{center}
+  \vspace{-4pt}
+  \begin{columns}[T]
+  \column{0.55\textwidth}
+    \begin{block}{}
+      \footnotesize
+      Etichete: \textbf{capacitate} / \textit{cost per unitate}\\[2pt]
+      Flux maxim: $|f^*|=6$. Cum trimitem la \alert{cost minim}?\\[2pt]
+      Vom urmari acest exemplu pe toata durata lectiei.
+    \end{block}
+  \column{0.43\textwidth}
+    \begin{block}{}
+      \footnotesize
+      $S\!\to\!A\!\to\!B\!\to\!T$: cost/unit $=3$\\
+      $S\!\to\!A\!\to\!T$:\hfill cost/unit $=3$\\
+      $S\!\to\!B\!\to\!T$:\hfill cost/unit $=4$\\[2pt]
+      Raspuns: cost total $= \mathbf{20}$
+    \end{block}
+  \end{columns}
+\end{frame}
+
+\begin{frame}[shrink]{Reteaua reziduala cu costuri}
+  \begin{block}{Definitie: reteaua reziduala $G_f$}
+    Fie $f$ un flux fezabil. Reteaua reziduala $G_f=(V,E_f)$ contine:
+    \begin{itemize}
+      \item \textbf{Muchie directa} $(u,v)$: capacitate $r(u,v)=\capop(u,v)-f(u,v)$,
+            cost $c(u,v)$ \textemdash{} \textit{daca} $r(u,v)>0$
+      \item \textbf{Muchie inversa} $(v,u)$: capacitate $r(v,u)=f(u,v)$,
+            cost $-c(u,v)$ \textemdash{} \textit{daca} $f(u,v)>0$
+    \end{itemize}
+    A trimite flux pe $(v,u)$ inseamna a \textit{anula} flux pe $(u,v)$: economisim $c(u,v)$ per
+    unitate, deci costul muchiei inverse este $-c(u,v)$.
+  \end{block}
+  \begin{alertblock}{Consecinta importanta: costuri negative!}
+    Spre deosebire de fluxul maxim clasic, reteaua reziduala poate contine muchii cu
+    \alert{cost negativ}. Asta face ca \textbf{Dijkstra clasic sa nu fie direct aplicabil}.
+    Avem doua optiuni:
+    \begin{itemize}\footnotesize
+      \item Bellman-Ford: trateaza costurile negative, dar $O(VE)$ per iteratie
+      \item Dijkstra cu potentiale Johnson: $O(E\log V)$ per iteratie, necesita transformare prealabila
+    \end{itemize}
+  \end{alertblock}
+\end{frame}
+
+\begin{frame}[shrink]{Reteaua reziduala --- dupa prima augmentare}
+  \begin{center}
+  \begin{tikzpicture}[scale=0.72]
+    \node[src] (S) at (0,0)    {S};
+    \node[nd]  (A) at (4.5,2)  {A};
+    \node[nd]  (B) at (4.5,-2) {B};
+    \node[snk] (T) at (9,0)    {T};
+
+    \draw[eg]  (S) to node[elbl,above left]  {$r{=}2$, $c{=}1$} (A);
+    \draw[eg]  (S) to node[elbl,below left]  {$r{=}2$, $c{=}3$} (B);
+    \draw[eg]  (A) to node[elbl,above right] {$r{=}3$, $c{=}2$} (T);
+    \draw[eg]  (B) to node[elbl,below right] {$r{=}1$, $c{=}1$} (T);
+
+    \draw[egres] (A) to[bend right=25] node[elbl,left] {$r{=}2$, $c{=}\alert{-1}$} (S);
+    \draw[egres] (B) to[bend right=25] node[elbl,right]{$r{=}2$, $c{=}\alert{-1}$} (A);
+    \draw[egres] (T) to[bend right=25] node[elbl,right]{$r{=}2$, $c{=}\alert{-1}$} (B);
+  \end{tikzpicture}
+  \end{center}
+  \begin{block}{}
+    \footnotesize
+    Dupa trimiterea a 2 unitati pe $S\!\to\!A\!\to\!B\!\to\!T$:
+    muchia $A\!\to\!B$ e saturata (dispare din reziduala).
+    Apar 3 muchii inverse cu \alert{cost negativ} \textemdash{}
+    ele permit ``anularea'' (partial) a fluxului trimis anterior.
+  \end{block}
+\end{frame}
+
+% ================================================================
+\section{Edmonds-Karp cu Bellman-Ford}
+
+\begin{frame}[shrink]{Conditia de optimalitate}
+  \begin{theorem}[Teorema ciclurilor negative]
+    Un flux fezabil $f^*$ este de cost minim (pentru valoarea sa) \textbf{daca si numai daca}
+    reteaua reziduala $G_{f^*}$ nu contine niciun ciclu orientat de cost negativ.
+  \end{theorem}
+  \begin{block}{Demonstratie}
+    \begin{itemize}
+      \item \textbf{($\Rightarrow$)} Daca $G_{f^*}$ are ciclu negativ $C$: putem circula
+            $\epsilon>0$ unitati de flux pe $C$ fara a schimba $|f^*|$.
+            Costul scade cu $\epsilon\cdot|\cost(C)|>0$. Contradictie cu optimalitatea lui $f^*$.
+      \item \textbf{($\Leftarrow$)} Fie $f'$ alt flux cu $|f'|=|f^*|$.
+            Diferenta $f'-f^*$ se descompune in cicluri in $G_{f^*}$.
+            Daca nu exista cicluri negative: $\cost(f')\geq\cost(f^*)$.
+    \end{itemize}
+  \end{block}
+  \begin{alertblock}{Consecinta directa}
+    \footnotesize
+    Algoritmul trimite flux pe \textit{cel mai scurt drum} (cost minim) din $G_f$. Dupa augmentare,
+    niciun ciclu negativ nou nu apare in $G_{f'}$ \textemdash{} invariantul de optimalitate se pastreaza.
+    Aceasta e garantia de corectitudine a algoritmului.
+  \end{alertblock}
+\end{frame}
+
+\begin{frame}[shrink]{Algoritmul Edmonds-Karp cu Bellman-Ford}
+  \begin{block}{Pseudocod}
+    \begin{enumerate}
+      \item Initializeaza $f(u,v)=0$; cost total $C=0$.
+      \item \textbf{Cat timp} exista drum $s\to t$ in $G_f$:
+        \begin{enumerate}
+          \item Gaseste drumul $P$ de \textit{cost minim} din $s$ in $t$ in $G_f$
+                prin \textbf{Bellman-Ford}.
+          \item $\delta\leftarrow\min_{(u,v)\in P} r(u,v)$ \quad \textit{(capacitate maxim trimisibila)}
+          \item Trimite $\delta$ unitati pe $P$: actualizeaza fluxul si $G_f$.
+          \item $C\leftarrow C+\delta\cdot\cost(P)$.
+        \end{enumerate}
+      \item Returneaza $(|f|, C)$.
+    \end{enumerate}
+  \end{block}
+  \begin{theorem}[Invariantul de optimalitate]
+    La inceputul fiecarei iteratii, fluxul curent $f$ este de cost minim pentru valoarea sa.
+    Dupa augmentare pe cel mai scurt drum $P$ cu distante $d[\cdot]$, orice ciclu nou
+    care foloseste muchii inverse din $P$ are cost $\geq 0$ (prin inegalitatea triunghiului),
+    deci $G_{f'}$ nu capata cicluri negative.
+  \end{theorem}
+\end{frame}
+
+\begin{frame}[fragile]{Bellman-Ford --- drumul de cost minim}
+  \begin{lstlisting}[belowskip=0pt]
+// d[]=distante, pre[]=muchia precedenta
+d[s] = 0; // restul: infinit
+for (int iter = 0; iter < n-1; iter++) {
+    bool updated = false;
+    for (int u = 0; u < n; u++) {
+        if (d[u] == INF) continue;
+        for (int idx : g[u]) {
+            auto [v, cap, cost] = e[idx];
+            if (cap <= 0) continue;  // saturata
+            if (d[u] + cost < d[v]) {
+                d[v] = d[u] + cost;
+                pre[v] = idx;
+                updated = true;
+            }
+        }
+    }
+    if (!updated) break;  // convergenta timpurie
+}
+// d[t]==INF: niciun drum, flux maxim atins
+  \end{lstlisting}
+  \smallskip
+  \begin{footnotesize}
+  \begin{itemize}\itemsep0pt
+    \item Functioneaza cu costuri negative (spre deosebire de Dijkstra clasic)
+    \item Complexitate $O(V\cdot E)$ per iteratie; in practica converge mult mai repede
+    \item \alert{Nu garanteaza terminarea pe cicluri negative} \textemdash{}
+          dar $G_f$ mentine invariantul: niciun ciclu negativ!
+  \end{itemize}
+  \end{footnotesize}
+\end{frame}
+
+\begin{frame}[shrink]{Exemplul de lucru --- Starea initiala}
+  \begin{center}
+  \begin{tikzpicture}[scale=0.72]
+    \node[src] (S) at (0,0)   {S};
+    \node[nd]  (A) at (4.5,2) {A};
+    \node[nd]  (B) at (4.5,-2){B};
+    \node[snk] (T) at (9,0)   {T};
+
+    \node[dlbl,above left=1pt of S] {$d{=}0$};
+    \node[dlbl,above=4pt of A]      {$d{=}\infty$};
+    \node[dlbl,below=4pt of B]      {$d{=}\infty$};
+    \node[dlbl,above right=1pt of T]{$d{=}\infty$};
+
+    \draw[eg] (S) to node[elbl,above left]  {$\mathbf{4}$/c=1} (A);
+    \draw[eg] (S) to node[elbl,below left]  {$\mathbf{2}$/c=3} (B);
+    \draw[eg] (A) to node[elbl,above right] {$\mathbf{3}$/c=2} (T);
+    \draw[eg] (B) to node[elbl,below right] {$\mathbf{3}$/c=1} (T);
+    \draw[eg] (A) to node[elbl,right]       {$\mathbf{2}$/c=1} (B);
+  \end{tikzpicture}
+  \end{center}
+  \begin{block}{}
+    \footnotesize
+    Starea initiala: niciun flux trimis, $f=0$ pe toate muchiile.
+    Rulam Bellman-Ford din $S$: $d[A]=1$, $d[B]=2$, $d[T]=3$ (via $S\!\to\!A\!\to\!B\!\to\!T$).
+    Nu exista costuri negative --- Bellman-Ford se comporta exact ca Dijkstra.
+  \end{block}
+\end{frame}
+
+\begin{frame}[shrink]{Iteratia 1 --- drumul de cost minim}
+  \begin{center}
+  \begin{tikzpicture}[scale=0.72]
+    \node[src] (S) at (0,0)   {S};
+    \node[nd]  (A) at (4.5,2) {A};
+    \node[nd]  (B) at (4.5,-2){B};
+    \node[snk] (T) at (9,0)   {T};
+
+    \node[dlbl,above left=1pt of S]  {$d{=}0$};
+    \node[dlbl,above=4pt of A]       {$d{=}1$};
+    \node[dlbl,below=4pt of B]       {$d{=}2$};
+    \node[dlbl,above right=1pt of T] {$d{=}3$};
+
+    \draw[eg]     (S) to node[elbl,below left]  {$\mathbf{2}$/c=3} (B);
+    \draw[eg]     (A) to node[elbl,above right] {$\mathbf{3}$/c=2} (T);
+    \draw[eg]     (B) to node[elbl,below right] {$\mathbf{3}$/c=1} (T);
+    \draw[eghigh] (S) to node[elbl,above left]  {$\mathbf{4}$/c=1} (A);
+    \draw[eghigh] (A) to node[elbl,right]       {$\mathbf{2}$/c=1} (B);
+    \draw[eghigh] (B) to[bend left=10] node[elbl,above left]  {$\mathbf{3}$/c=1} (T);
+  \end{tikzpicture}
+  \end{center}
+  \begin{columns}[T]
+  \column{0.50\textwidth}
+    \begin{block}{Drumul ales: $S\to A\to B\to T$}
+      \footnotesize
+      $d[T]=3$ (via $S\!\to\!A\!\to\!B\!\to\!T$, cost $1+1+1=3$)\\
+      Egalitate: $S\!\to\!A\!\to\!T$ are cost $1+2=3$ de asemenea\\
+      $\delta = \min(4, 2, 3) = 2$ unitati
+    \end{block}
+  \column{0.48\textwidth}
+    \begin{alertblock}{Augmentare}
+      \footnotesize
+      Cost adaugat: $2\times 3=6$\\[2pt]
+      \textbf{Flux total: 2 $\mid$ Cost total: 6}
+    \end{alertblock}
+  \end{columns}
+\end{frame}
+
+\begin{frame}[shrink]{Iteratia 2 --- costuri negative in retea reziduala}
+  \begin{center}
+  \begin{tikzpicture}[scale=0.72]
+    \node[src] (S) at (0,0)    {S};
+    \node[nd]  (A) at (4.5,2)  {A};
+    \node[nd]  (B) at (4.5,-2) {B};
+    \node[snk] (T) at (9,0)    {T};
+
+    \node[dlbl,above left=1pt of S]  {$d{=}0$};
+    \node[dlbl,above=4pt of A]       {$d{=}1$};
+    \node[dlbl,below=4pt of B]       {$d{=}3$};
+    \node[dlbl,above right=1pt of T] {$d{=}3$};
+
+    \draw[eg]     (S) to node[elbl,below left]  {$r{=}2$, $c{=}3$} (B);
+    \draw[egres]  (B) to[bend right=30] node[elbl,left]  {$r{=}2$, $c{=}\alert{-1}$} (A);
+    \draw[eg]     (B) to node[elbl,below right] {$r{=}1$, $c{=}1$} (T);
+    \draw[eghigh] (S) to node[elbl,above left]  {$r{=}2$, $c{=}1$} (A);
+    \draw[eghigh] (A) to node[elbl,above right] {$r{=}3$, $c{=}2$} (T);
+  \end{tikzpicture}
+  \end{center}
+  \begin{columns}[T]
+  \column{0.50\textwidth}
+    \begin{block}{Bellman-Ford gaseste: $S\to A\to T$}
+      \footnotesize
+      Muchia inversa $B\!\to\!A$ cu $c=-1$ e in retea, dar\\
+      Bellman-Ford alege drumul optim $S\!\to\!A\!\to\!T$: cost $1+2=3$.\\
+      $\delta=\min(2,3)=2$
+    \end{block}
+  \column{0.48\textwidth}
+    \begin{alertblock}{Augmentare}
+      \footnotesize
+      Cost adaugat: $2\times 3=6$\\[2pt]
+      \textbf{Flux: 4 $\mid$ Cost: 12}
+    \end{alertblock}
+  \end{columns}
+\end{frame}
+
+\begin{frame}[shrink]{Iteratia 3}
+  \begin{center}
+  \begin{tikzpicture}[scale=0.72]
+    \node[src] (S) at (0,0)    {S};
+    \node[nd]  (A) at (4.5,2)  {A};
+    \node[nd]  (B) at (4.5,-2) {B};
+    \node[snk] (T) at (9,0)    {T};
+
+    \node[dlbl,above left=1pt of S]  {$d{=}0$};
+    \node[dlbl,above=4pt of A]       {$d{=}2$};
+    \node[dlbl,below=4pt of B]       {$d{=}3$};
+    \node[dlbl,above right=1pt of T] {$d{=}4$};
+
+    \draw[egsat] (S) to node[elbl,above left]  {$r{=}0$\;SAT} (A);
+    \draw[eghigh](S) to node[elbl,below left]  {$r{=}2$, $c{=}3$} (B);
+    \draw[eghigh](B) to node[elbl,below right] {$r{=}1$, $c{=}1$} (T);
+    \draw[egres] (B) to[bend right=30] node[elbl,left] {$r{=}2$, $c{=}\alert{-1}$} (A);
+    \draw[eg]    (A) to node[elbl,above right] {$r{=}1$, $c{=}2$} (T);
+  \end{tikzpicture}
+  \end{center}
+  \begin{columns}[T]
+  \column{0.50\textwidth}
+    \begin{block}{Drum: $S\to B\to T$}
+      \scriptsize
+      $S\to A$ saturat. $d[B]=3$ (via $S\!\to\!B$).\\
+      $B\!\to\!A$ (cost $-1$): $d[A]=2$, $d[T]=4$ via $A$.\\
+      $B\!\to\!T$ direct: $d[T]=4$. Ambele drumuri cost 4.\\
+      Ales: $S\!\to\!B\!\to\!T$. $\delta=\min(2,1)=1$
+    \end{block}
+  \column{0.48\textwidth}
+    \begin{alertblock}{Augmentare}
+      \footnotesize
+      Cost adaugat: $1\times 4=4$\\[2pt]
+      \textbf{Flux: 5 $\mid$ Cost: 16}
+    \end{alertblock}
+  \end{columns}
+\end{frame}
+
+\begin{frame}[shrink]{Iteratia 4 --- muchia inversa in actiune}
+  \begin{center}
+  \begin{tikzpicture}[scale=0.72]
+    \node[src] (S) at (0,0)    {S};
+    \node[nd]  (A) at (4.5,2)  {A};
+    \node[nd]  (B) at (4.5,-2) {B};
+    \node[snk] (T) at (9,0)    {T};
+
+    \node[dlbl,above left=1pt of S]  {$d{=}0$};
+    \node[dlbl,above=4pt of A]       {$d{=}2$};
+    \node[dlbl,below=4pt of B]       {$d{=}3$};
+    \node[dlbl,above right=1pt of T] {$d{=}4$};
+
+    \draw[egsat]  (S) to node[elbl,above left]  {$r{=}0$\;SAT} (A);
+    \draw[eghigh] (S) to node[elbl,below left]  {$r{=}1$, $c{=}3$} (B);
+    \draw[egsat]  (B) to node[elbl,below right] {$r{=}0$\;SAT} (T);
+    \draw[eghigh] (B) to[bend right=30] node[elbl,left] {$r{=}2$, $c{=}\alert{-1}$} (A);
+    \draw[eghigh] (A) to node[elbl,above right] {$r{=}1$, $c{=}2$} (T);
+  \end{tikzpicture}
+  \end{center}
+  \begin{columns}[T]
+  \column{0.55\textwidth}
+    \begin{block}{Drum: $S\to B\to A\to T$ (cu muchie inversa!)}
+      \scriptsize
+      $d[B]=3$, $d[A]=d[B]+(-1)=2$, $d[T]=d[A]+2=4$.\\
+      Cost real: $3-1+2=4$/unit. $\delta=\min(1,2,1)=1$.\\
+      $B\!\to\!A$ \alert{anuleaza} flux din it.\ 1 \textemdash{} puterea retelei reziduale.
+    \end{block}
+  \column{0.43\textwidth}
+    \begin{alertblock}{Final}
+      \footnotesize
+      Cost adaugat: $1\times 4=4$\\[2pt]
+      \textbf{Flux: 6 $\mid$ Cost: 20}\\
+      Niciun drum $s\to t$ nu mai exista: \textbf{STOP}
+    \end{alertblock}
+  \end{columns}
+\end{frame}
+
+\begin{frame}[shrink]{Rezumatul iteratiilor si complexitatea BF}
+  \begin{center}
+  \begin{tabular}{@{}clccc@{}}
+    \toprule
+    \textbf{It.} & \textbf{Drum augmentant} & \textbf{Cost/unit} & \textbf{$\delta$} & \textbf{Cost adaugat}\\
+    \midrule
+    1 & $S\to A\to B\to T$ & $1+1+1=3$ & 2 & 6\\
+    2 & $S\to A\to T$ & $1+2=3$ & 2 & 6\\
+    3 & $S\to B\to T$ & $3+1=4$ & 1 & 4\\
+    4 & $S\to B\to A\to T$ & $3+(-1)+2=4$ & 1 & 4\\
+    \midrule
+    & \textbf{Total flux maxim} & & \textbf{6} & \textbf{20}\\
+    \bottomrule
+  \end{tabular}
+  \end{center}
+  \smallskip
+  \begin{columns}[T]
+  \column{0.52\textwidth}
+    \begin{block}{Observatii}
+      \begin{footnotesize}
+      \begin{itemize}
+        \item Drumurile sunt gasite \textit{in ordine crescatoare de cost}:
+              $3, 3, 4, 4$. Proprietate generala a algoritmului.
+        \item Iteratia 4: muchia inversa permite
+              \textit{corectarea} deciziilor anterioare.
+      \end{itemize}
+      \end{footnotesize}
+    \end{block}
+  \column{0.46\textwidth}
+    \begin{alertblock}{Complexitate Edmonds-Karp cu Bellman-Ford}
+      \begin{footnotesize}
+      \begin{itemize}
+        \item Bellman-Ford per iteratie: $O(V\!\cdot\! E)$ worst-case
+        \item Total: $O(F\!\cdot\! V\!\cdot\! E)$, $F=|f^*|$
+        \item Periculos pe teste adversariale
+        \item Solutie: \textbf{Dijkstra cu potentiale}
+      \end{itemize}
+      \end{footnotesize}
+    \end{alertblock}
+  \end{columns}
+\end{frame}
+
+% ================================================================
+\section{Dijkstra cu Potentiale Johnson}
+
+\begin{frame}[shrink]{De ce avem nevoie de potentiale?}
+  \begin{block}{Problema}
+    \begin{itemize}
+      \item Dijkstra e $O(E\log V)$ per iteratie, mult mai bun ca Bellman-Ford ($O(VE)$).
+      \item Dar Dijkstra \textbf{nu functioneaza} pe grafuri cu costuri negative!
+      \item Reteaua reziduala are \textit{intotdeauna} costuri negative (muchiile inverse).
+      \item Exemplu: muchia $B\to A$ cu cost $-1$ din reteaua noastra reziduala.
+    \end{itemize}
+  \end{block}
+  \begin{alertblock}{Solutia: transformarea Johnson}
+    Definim \textbf{potentiale} $\pi:V\to\mathbb{R}$ si \textbf{costuri reduse}:
+    \[
+      \cbar(u,v) = c(u,v) + \pi[u] - \pi[v]
+    \]
+    Alegem $\pi$ astfel incat obtinem \textbf{doua proprietati simultan}:
+    \begin{itemize}\footnotesize\itemsep1pt
+      \item $\cbar(u,v)\geq 0$ pentru orice muchie \textemdash{} putem aplica Dijkstra!
+      \item \textbf{Shortest paths se conserva}: $\dist_{\cbar}(s,u) = \dist_c(s,u) + \pi[s] - \pi[u]$\\
+            adica diferenta dintre drumuri e constanta $\Rightarrow$ drumul optim ramane acelasi.
+            Nu modificam structura grafului de shortest paths.
+    \end{itemize}
+  \end{alertblock}
+  \begin{block}{Initializarea potentialelor}
+    \begin{itemize}\footnotesize
+      \item Costuri initiale \textbf{$\geq 0$}: $\pi[v]=0$ $\forall v$. Incepem direct cu Dijkstra.
+      \item Costuri initiale \textbf{negative}: rulam Bellman-Ford \textit{o singura data}
+            pe graful initial si setam $\pi[v]=\dist_{BF}(s,v)$.
+            Dupa asta, toate rundele urmatoare folosesc Dijkstra.
+    \end{itemize}
+  \end{block}
+\end{frame}
+
+\begin{frame}[shrink]{Potentiale Johnson --- proprietati fundamentale}
+  \begin{theorem}[Costurile reduse sunt non-negative]
+    Daca $\pi[v]=\dist(s,v)$ (distantele minime din $s$ in $G_f$ curenta),
+    atunci $\cbar(u,v)=c(u,v)+\pi[u]-\pi[v]\geq 0$ pentru orice $(u,v)\in G_f$.
+  \end{theorem}
+  \begin{proof}
+    Prin inegalitatea triunghiului pentru distante minime:\\[2pt]
+    $\dist(s,v)\leq\dist(s,u)+c(u,v)$\\[1pt]
+    $\Leftrightarrow\;\pi[v]\leq\pi[u]+c(u,v)$\\[1pt]
+    $\Leftrightarrow\;c(u,v)+\pi[u]-\pi[v]\geq 0$\\[1pt]
+    $\Leftrightarrow\;\cbar(u,v)\geq 0$.
+  \end{proof}
+  \begin{block}{Drumurile optime se pastreaza}
+    Costul unui drum $P$ in costuri reduse:
+    \[
+      \sum_{(u,v)\in P}\cbar(u,v) = \sum_{(u,v)\in P}c(u,v) + \pi[s] - \pi[t]
+    \]
+    Diferenta $\pi[s]-\pi[t]$ e constanta pentru orice drum $s\to t$.
+    Minimizand costuri reduse $\equiv$ minimizand costuri reale.
+  \end{block}
+\end{frame}
+
+\begin{frame}[shrink]{Actualizarea potentialelor si costul total}
+  \begin{block}{Regula de update (dupa fiecare Dijkstra)}
+    Fie $d[v]$ distantele reduse gasite de Dijkstra. Actualizam:
+    \[
+      \pi'[v] \;\leftarrow\; \pi[v] + d[v] \qquad\forall v \text{ accesibil din } s
+    \]
+    Noile potentiale $\pi'[v]$ reprezinta distantele reale de la $s$ la $v$.
+    Dupa update si augmentare, $\cbar'(u,v)\geq 0$ pentru orice muchie din $G_{f'}$
+    (demonstratia foloseste egalitatea $d[v]=d[u]+\cbar(u,v)$ pe drumul augmentat).
+  \end{block}
+  \begin{block}{De ce \lstinline|cost += aug * h[t]|?}
+    \footnotesize
+    $\pi[s]=0$ mereu ($d[s]=0$ la fiecare Dijkstra, $\pi[s]$ ramane 0).
+    Costul real al drumului:
+    \[
+      \cost_{real}(P) = d[t] + \pi[t] = \pi'[t]
+    \]
+    \textemdash{} \textbf{potentialul lui $t$ dupa update!}\\[4pt]
+    \textbf{Verificare pe exemplu:}
+    It.\,1: $\pi'[T]=0+3=3$, cost $=2\times 3=6$.
+    It.\,2: $\pi'[T]=3+0=3$, cost $=2\times 3=6$.
+    It.\,3: $\pi'[T]=3+1=4$, cost $=1\times 4=4$.
+    It.\,4: $\pi'[T]=4+0=4$, cost $=1\times 4=4$.
+    Total: $\mathbf{20}$. \checkmark
+  \end{block}
+\end{frame}
+
+\begin{frame}[shrink]{Dijkstra cu potentiale pe iteratia 2}
+  \begin{center}
+  \begin{tikzpicture}[scale=0.72]
+    \node[src] (S) at (0,0)    {S};
+    \node[nd]  (A) at (4.5,2)  {A};
+    \node[nd]  (B) at (4.5,-2) {B};
+    \node[snk] (T) at (9,0)    {T};
+
+    \node[font=\tiny\color{gray},above left=4pt of S]  {$\pi{=}0$};
+    \node[font=\tiny\color{gray},above=12pt of A]      {$\pi{=}1$};
+    \node[font=\tiny\color{gray},below=12pt of B]      {$\pi{=}2$};
+    \node[font=\tiny\color{gray},above right=4pt of T] {$\pi{=}3$};
+
+    \draw[eg]     (S) to node[elbl,below left]  {$r{=}2$, $\cbar{=}1$} (B);
+    \draw[egres]  (B) to[bend right=30] node[elbl,left]  {$r{=}2$, $\cbar{=}0$} (A);
+    \draw[eg]     (B) to node[elbl,below right] {$r{=}1$, $\cbar{=}0$} (T);
+    \draw[eghigh] (S) to node[elbl,above left]  {$r{=}2$, $\cbar{=}0$} (A);
+    \draw[eghigh] (A) to node[elbl,above right] {$r{=}3$, $\cbar{=}0$} (T);
+
+    \node[dlbl,below left=4pt of S]  {$d{=}0$};
+    \node[dlbl,above=4pt of A]       {$d{=}0$};
+    \node[dlbl,below=4pt of B]       {$d{=}1$};
+    \node[dlbl,below right=4pt of T] {$d{=}0$};
+  \end{tikzpicture}
+  \end{center}
+  \vspace{-6pt}
+  \begin{columns}[T]
+  \column{0.55\textwidth}
+    \begin{block}{Costuri reduse $\cbar(u,v)=c+\pi[u]-\pi[v]$}
+      \scriptsize
+      $\cbar(S,A)=1+0-1=0$; $\cbar(A,T)=2+1-3=0$\\
+      $\cbar(B,A)=-1+2-1=0$; $\cbar(S,B)=3+0-2=1$\\
+      Dijkstra: toti $\cbar\geq 0$, functioneaza corect!\\
+      Drum: $S\!\to\!A\!\to\!T$, $\delta=2$, cost real $=0+3=3$/unit
+    \end{block}
+  \column{0.43\textwidth}
+    \begin{alertblock}{Complexitate finala}
+      \scriptsize
+      $O(E\log V)$ per Dijkstra\\
+      $F$ iteratii total\\
+      \textbf{$O(F\cdot E\log V)$}\\[2pt]
+      Fata de Bellman-Ford: $O(F\cdot VE)$\\
+      Imbunatatire cu factorul $V/\log V$
+    \end{alertblock}
+  \end{columns}
+\end{frame}
+
+\begin{frame}[shrink]{Dijkstra sau Dinic --- dupa potentiale}
+  \begin{block}{Dupa potentiale, ambele sunt posibile}
+    \begin{footnotesize}
+    \begin{itemize}\itemsep0pt
+      \item \textbf{Dijkstra pe costuri reduse} (varianta standard): la fiecare iteratie gasim
+            un singur drum de cost minim si augmentam. $O(F\cdot E\log V)$ total.
+      \item \textbf{Dijkstra cu flux de blocare} (varianta avansata): dupa ce Dijkstra
+            stabileste distantele, augmentam \textit{toate} drumurile de cost minim simultan
+            (exact ca Dinic pe graful de nivel). Reduce numarul de faze Dijkstra.
+    \end{itemize}
+    \end{footnotesize}
+  \end{block}
+  \vspace{-6pt}
+  \begin{alertblock}{De ce varianta standard e suficienta pentru competitii}
+    \begin{footnotesize}
+    \begin{itemize}\itemsep0pt
+      \item In competitii, $F$ mic ($\leq 10^4$--$10^5$), $E\leq 10^5$:
+            Dijkstra pe costuri reduse e suficient de rapid.
+      \item Varianta cu flux de blocare e mai complexa de implementat si rareori necesara.
+      \item Implementarea cu vector plat + truc XOR (sectiunea urmatoare) e compacta si rapida.
+    \end{itemize}
+    \end{footnotesize}
+  \end{alertblock}
+  \vspace{-6pt}
+  \begin{block}{Tabel comparativ}
+    \footnotesize
+    \begin{tabular}{llp{2.8cm}}
+    Edmonds-Karp cu Bellman-Ford & $O(F\!\cdot\! VE)$ & simplu, lent\\
+    Dijkstra + potentiale & $O(F\!\cdot\! E\log V)$ & \textbf{recomandat}\\
+    Dijkstra + flux de blocare & mai rapid & complex, rar\\
+    \end{tabular}
+  \end{block}
+\end{frame}
+
+% ================================================================
+\section{Implementare}
+
+\begin{frame}[fragile]{Structura si \texttt{addEdge}}
+  \begin{lstlisting}[belowskip=0pt]
+using flow_t = int;
+
+struct Edge {
+    int from, to;
+    flow_t capacity, flow, cost;
+    Edge(int from, int to, flow_t capacity, flow_t cost)
+        : from(from), to(to), capacity(capacity), flow(0), cost(cost) {}
+};
+
+struct MinCostMaxFlow {
+    int V, E = 0;
+    vector<vector<int>> g;
+    vector<Edge> edges;
+    vector<flow_t> h, dis;
+    vector<int> pre;
+
+    MinCostMaxFlow(int V) : V(V), E(0), g(V) {}
+
+    void addEdge(int from, int to, flow_t capacity, flow_t cost) {
+        g[from].push_back(E++);
+        edges.emplace_back(from, to, capacity, cost);
+        g[to].push_back(E++);
+        edges.emplace_back(to, from, 0, -cost);
+    }
+  \end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile,shrink]{Dijkstra cu costuri reduse}
+  \begin{lstlisting}
+    bool dijkstra(int source, int sink) {
+        dis.assign(V, numeric_limits<flow_t>::max());
+        pre.assign(V, -1);
+        priority_queue<pair<flow_t,int>,
+                       vector<pair<flow_t,int>>, greater<>> pq;
+        dis[source] = 0;
+        pq.emplace(0, source);
+        while (!pq.empty()) {
+            auto [d, u] = pq.top(); pq.pop();
+            if (dis[u] != d) continue;
+            for (int i : g[u]) {
+                if (edges[i].flow == edges[i].capacity) continue; // saturated
+                int v = edges[i].to;
+                flow_t w = edges[i].cost + h[u] - h[v]; // reduced cost >= 0
+                if (dis[v] > d + w) {
+                    dis[v] = d + w;
+                    pre[v] = i;
+                    pq.emplace(dis[v], v);
+                }
+            }
+        }
+        return dis[sink] != numeric_limits<flow_t>::max();
+    }
+  \end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]{Bucla principala --- \texttt{flow()}}
+  \begin{lstlisting}[belowskip=0pt]
+    // Returns {max_flow, min_cost}
+    pair<flow_t, flow_t> flow(int source, int sink) {
+        h.assign(V, 0);
+        flow_t total_flow = 0, total_cost = 0;
+        while (dijkstra(source, sink)) {
+            for (int i = 0; i < V; i++) h[i] += dis[i]; // update potentials
+            flow_t aug = numeric_limits<flow_t>::max();
+            for (int i = sink; i != source; i = edges[pre[i]^1].to)
+                aug = min(aug, edges[pre[i]].capacity - edges[pre[i]].flow);
+            for (int i = sink; i != source; i = edges[pre[i]^1].to) {
+                edges[pre[i]].flow += aug;
+                edges[pre[i]^1].flow -= aug;
+            }
+            total_flow += aug;
+            total_cost += aug * h[sink]; // h[sink] = real cost of this path
+        }
+        return {total_flow, total_cost};
+    }
+};
+  \end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]{Artificii de implementare}
+  \begin{block}{XOR pentru perechi de muchii}
+    \lstinline|addEdge| adauga mereu doua muchii consecutive: directa (\lstinline|i| par)
+    si inversa (\lstinline|i+1| impar). Pentru a accesa muchia pereche in $O(1)$: \lstinline|edges[i ^ 1]|.\\
+  \end{block}
+  \begin{block}{Reconstructia drumului inapoi}
+    \lstinline|pre[v]| = indicele muchiei ce \textit{intra} in \lstinline|v|.
+    Traversare de la \lstinline|sink| la \lstinline|source|:
+    \begin{lstlisting}[belowskip=0pt]
+for (int i = sink; i != source; i = edges[pre[i]^1].to)
+    // edges[pre[i]]    = muchia ce intra in i
+    // edges[pre[i]^1]  = muchia inversa (pleaca din i)
+    // edges[pre[i]^1].to = nodul anterior pe drum
+    \end{lstlisting}
+  \end{block}
+  \begin{block}{Costul real dupa actualizarea potentialelor}
+    Dupa \lstinline|h[i] += dis[i]|, valoarea \lstinline|h[sink]| reprezinta
+    costul real (in unitati originale) al drumului gasit \textemdash{}
+    deoarece \lstinline|dis[sink]| e distanta in costuri reduse, iar cumulul
+    potentialelor reface costul original.
+  \end{block}
+  \begin{block}{Flux de valoare exact $K$}
+    Cand \lstinline|total_flow + aug| urmeazÄƒ sÄƒ depÄƒÈ™eascÄƒ K, adaugam doar \lstinline|K - aug| flux. Util cand problema cere
+    exact $K$ unitati de flux (nu maximul).
+  \end{block}
+\end{frame}
+
+% ================================================================
+\section{Problema Asignarii}
+
+\begin{frame}[shrink]{Problema asignarii (Assignment Problem)}
+  \begin{block}{Enunt}
+    Avem $n$ lucratori si $n$ joburi. Costul de a asigna lucratorul $i$ la jobul $j$
+    este $A[i][j]$. Gasiti asignarea bijectiva de cost minim:
+    \[
+      \min_{\sigma \in S_n} \sum_{i=1}^{n} A[i][\sigma(i)]
+    \]
+  \end{block}
+  \begin{block}{Formulari echivalente}
+    \begin{itemize}\footnotesize\itemsep1pt
+      \item \textbf{Matrice $n\times n$}: selectati un element per linie si per coloana,
+            suma minima.
+      \item \textbf{Graf bipartit complet} $K_{n,n}$ cu ponderi pe muchii:
+            gasiti \textit{perfect matching} de cost minim.
+      \item \textbf{Rectangular}: $n\neq m$ \textemdash{} completati cu linii/coloane de cost 0
+            sau $\infty$ pentru a aduce la forma patrata.
+      \item \textbf{Maximizare}: inmultiti costurile cu $-1$.
+    \end{itemize}
+  \end{block}
+  \begin{alertblock}{Aplicatii}
+    \footnotesize
+    Planificare joburi pe masini, alocare resurse, recunoastere de tipare (matching imagini),
+    alinierea secventelor (bioinformatica).
+  \end{alertblock}
+\end{frame}
+
+\begin{frame}[shrink]{Asignarea ca FMCM}
+  \begin{block}{Constructia grafului}
+    \begin{itemize}\footnotesize\itemsep2pt
+      \item Nod sursa $S$, nod destinatie $T$.
+      \item $S \to$ lucrator$_i$: capacitate $1$, cost $0$ \quad ($n$ muchii)
+      \item Lucrator$_i \to$ job$_j$: capacitate $1$, cost $A[i][j]$ \quad ($n^2$ muchii)
+      \item Job$_j \to T$: capacitate $1$, cost $0$ \quad ($n$ muchii)
+    \end{itemize}
+  \end{block}
+  \begin{block}{Solutia}
+    Rulam FMCM pentru $n$ unitati de flux $S\to T$.\\
+    Fiecare unitate de flux alege un drum $S\to i\to j\to T$,
+    adica asigneaza lucratorul $i$ la jobul $j$.\\[3pt]
+    \footnotesize
+    \textbf{Complexitate:} $O(n^2 \cdot n\log n) = O(n^3 \log n)$ cu Dijkstra + potentiale.
+  \end{block}
+  \begin{alertblock}{Algoritmul Unguresc (Hungarian Algorithm)}
+    \footnotesize
+    Algoritm specializat pentru asignare in $O(n^3)$, mai rapid decat FMCM in practica.
+    Foloseste potentiale (dual) similar cu Johnson, dar exploateaza structura bipartita.
+    Implementare: \href{https://cp-algorithms.com/graph/hungarian-algorithm.html}{\textbf{cp-algorithms.com/graph/hungarian-algorithm}}.\\[2pt]
+    \textbf{FMCM vs. Unguresc:}
+    Graf general cu structura de asignare \textemdash{} FMCM.
+    Matrice $n\times n$ pura \textemdash{} Unguresc pentru $O(n^3)$ garantat.
+  \end{alertblock}
+\end{frame}
+
+% ================================================================
+\section{Probleme}
+
+% ---- Jamne ----
+\subsection*{Jamne (Algolymp Contest F)}
+
+\begin{frame}[shrink]{Jamne --- Enunt}
+  \begin{block}{Problema}
+    Avem un \textbf{stoc} de litere: $\mathit{frq}[c]$ litere de tipul $c$
+    (pentru $c\in\{a,\ldots,z\}$). Vrem sa formam un cuvant dat $W$.\\
+    \smallskip
+    Dispunem de $M$ \textbf{oferte} de la vraci Jaxson:
+    ``Da-mi litera $L_1$ si $x$ galbeni $\to$ primesti litera $L_2$'' (schimb $1$-la-$1$).\\
+    \smallskip
+    Minimizati \textbf{numarul de galbeni} platit, sau afisati ``NU'' daca e imposibil.
+    $T$ scenarii de test.
+  \end{block}
+  \begin{exampleblock}{Observatie: Floyd-Warshall pe oferte}
+    \footnotesize
+    Putem Ã®nlÄƒnÈ›ui oferte: $a\xrightarrow{2}b$, $b\xrightarrow{3}c$
+    $\Rightarrow$ transformam $a\to c$ cu cost $5$.
+    Precalculam $\mathit{rf}[i][j]=$ costul minim de a transforma
+    litera $i$ in litera $j$ (Floyd-Warshall pe graful ofertelor, $26$ noduri).
+    Daca nu exista cale: $\mathit{rf}[i][j]=\infty$.
+  \end{exampleblock}
+\end{frame}
+
+\begin{frame}{Jamne --- Constructia FMCM}
+  \begin{center}
+  \vspace{-4pt}
+  \begin{tikzpicture}[scale=0.72]
+    \node[src,minimum size=8mm,font=\scriptsize\bfseries] (S) at (-1,0) {S};
+    \node[nd,minimum size=8mm,font=\scriptsize] (A1) at (1.5,1.5)  {a};
+    \node[nd,minimum size=8mm,font=\scriptsize] (B1) at (1.5,0)    {b};
+    \node[font=\scriptsize\color{gray}] at (1.5,-1)    {$\vdots$};
+    \node[nd,minimum size=8mm,font=\scriptsize] (Z1) at (1.5,-2)   {z};
+
+    \node[nd,minimum size=8mm,font=\scriptsize] (A2) at (5,1.5)  {a};
+    \node[nd,minimum size=8mm,font=\scriptsize] (B2) at (5,0)    {b};
+    \node[font=\scriptsize\color{gray}] at (5,-1)    {$\vdots$};
+    \node[nd,minimum size=8mm,font=\scriptsize] (Z2) at (5,-2)   {z};
+    \node[snk,minimum size=8mm,font=\scriptsize\bfseries] (T) at (7.5,0) {T};
+
+    \draw[eg] (S)  -- node[elbl,above,sloped] {frq[a]} (A1);
+    \draw[eg] (S)  -- node[elbl,above,sloped] {frq[b]} (B1);
+    \draw[eg] (S)  -- node[elbl,below,sloped] {frq[z]} (Z1);
+    \draw[eg] (A2) -- node[elbl,above,sloped] {need[a]} (T);
+    \draw[eg] (B2) -- node[elbl,above,sloped] {need[b]} (T);
+    \draw[eg] (Z2) -- node[elbl,below,sloped] {need[z]} (T);
+
+    \draw[eg,dashed,advAccent!80] (A1) -- node[elbl,above] {\tiny rf[a][a]=0} (A2);
+    \draw[eg,dashed,advAccent!60] (A1) -- node[elbl,below left,xshift=5pt] {\tiny rf[a][b]} (B2);
+    \draw[eg,dashed,advAccent!60] (B1) -- node[elbl,below right] {\tiny rf[b][a]} (A2);
+    \draw[eg,dashed,advAccent!80] (B1) -- node[elbl,below] {\tiny rf[b][b]=0} (B2);
+  \end{tikzpicture}
+  \end{center}
+  \begin{columns}[T]
+  \column{0.52\textwidth}
+    \begin{block}{54 noduri: S, 26 litere stoc, 26 litere nevoie, T}
+      \footnotesize
+      \begin{itemize}
+        \item $S\to i$: cap $=\mathit{frq}[i]$, cost $=0$
+        \item $i\to j$: cap $=\infty$, cost $=\mathit{rf}[i][j]$
+              (daca $\mathit{rf}[i][j]<\infty$)
+        \item $j\to T$: cap $=\mathit{need}[j]$, cost $=0$
+      \end{itemize}
+    \end{block}
+  \column{0.46\textwidth}
+    \begin{alertblock}{Raspuns}
+      \footnotesize
+      Daca flux maxim $= |W|$: raspuns $=$ cost minim.\\
+      Altfel: ``NU'' (nu avem suficiente litere).
+    \end{alertblock}
+    \begin{block}{Link}
+      \footnotesize
+      \href{https://code.algolymp.com/problems/3450}{\textbf{code.algolymp.com/problems/3450}}
+    \end{block}
+  \end{columns}
+\end{frame}
+
+\begin{frame}[fragile,shrink]{Jamne --- Implementare compacta}
+  \begin{lstlisting}
+// Floyd-Warshall pe oferte (26 litere)
+for (int k = 0; k < 26; k++)
+  for (int i = 0; i < 26; i++)
+    for (int j = 0; j < 26; j++)
+      rf[i][j] = min(rf[i][j], rf[i][k] + rf[k][j]);
+
+// Constructie FMCM cu 26+26+2 noduri
+MinCostFlow<ll> mcf(2 * 26 + 2);
+for (int i = 0; i < 26; i++) {
+    mcf.addEdge(0, i + 1, frq[i], 0);           // S -> stoc[i]
+    for (int j = 0; j < 26; j++)
+        if (rf[i][j] < INF)
+            mcf.addEdge(i+1, j+26+1, INF, rf[i][j]); // stoc[i]->nevoie[j]
+    mcf.addEdge(i + 26 + 1, 53, need[i], 0);    // nevoie[i] -> T
+}
+auto [flow, cost] = mcf.flow(0, 53);
+if (flow != (int)cuvant.size()) cout << "NU\n";
+else cout << "DA " << cost << "\n";
+  \end{lstlisting}
+  \begin{block}{Complexitate}
+    \footnotesize
+    Floyd-Warshall: $O(26^3)$. FMCM: $|W|$ iteratii, $O(26^2)$ muchii, $O(52)$ noduri.
+    Total per test: $O(26^3 + |W|\cdot 26^2\cdot\log 52)$.
+  \end{block}
+\end{frame}
+
+% ---- Traseu ----
+\subsection*{Traseu (infoarena)}
+
+\begin{frame}[shrink]{Traseu --- Enunt}
+  \begin{block}{Enunt}
+    Se da un graf orientat cu $N$ noduri si $M$ muchii, fiecare muchie avand o lungime.
+    Gasiti parcursul \textbf{inchis de lungime minima} care traverseaza fiecare muchie
+    \textbf{cel putin o data}.
+  \end{block}
+  \begin{exampleblock}{Observatie: Circuitul Eulerian}
+    Un graf orientat admite circuit Eulerian daca si numai daca e \textbf{tare conex}
+    si \textbf{fiecare nod e echilibrat}: $\deg^+(v) = \deg^-(v)$ pentru orice $v$.\\[4pt]
+    Daca graful e Eulerian, raspunsul e simplu: \textbf{suma lungimilor tuturor muchiilor}
+    (un circuit Eulerian le traverseaza pe fiecare exact o data).
+    Problema: graful $\mathbf{nu}$ e necesar Eulerian!
+  \end{exampleblock}
+  \begin{alertblock}{Idee: echilibram graful cu traversari suplimentare}
+    \footnotesize
+    Adaugam traversari suplimentare (pe traseele cele mai scurte) pentru a echilibra
+    nodurile dezechilibrate. Costul minim al acestor traversari suplimentare = FMCM.
+  \end{alertblock}
+\end{frame}
+
+\begin{frame}[shrink]{Traseu --- Constructia FMCM}
+  \begin{block}{Dezechilibrul unui nod}
+    $\text{dez}(v) = \deg^-(v) - \deg^+(v)$\quad (in minus out)
+    \begin{itemize}
+      \item $\text{dez}(v) > 0$: mai multe muchii care intra decat ies, trebuie sa trimita flux (sursa)
+      \item $\text{dez}(v) < 0$: mai multe muchii care ies decat intra, trebuie sa primeasca flux (destinatie)
+      \item $\text{dez}(v) = 0$: echilibrat, nicio actiune necesara
+    \end{itemize}
+  \end{block}
+  \begin{block}{Graf FMCM}
+    \begin{enumerate}
+      \item \textbf{Floyd-Warshall}: calculeaza $\dist(u,v)$ = cel mai scurt drum intre orice pereche
+      \item \textbf{Nod sursa $S$, destinatie $T$} (noduri auxiliare):
+        \begin{itemize}\footnotesize
+          \item $S \to v$ cu cap $= \text{dez}(v)$, cost $= 0$, pentru $\text{dez}(v)>0$
+          \item $v \to T$ cu cap $= |\text{dez}(v)|$, cost $= 0$, pentru $\text{dez}(v)<0$
+          \item $u \to v$ cu cap $= \infty$, cost $= \dist(u,v)$,
+                daca $\text{dez}(u)>0$, $\text{dez}(v)<0$, $\dist(u,v)<\infty$
+        \end{itemize}
+    \end{enumerate}
+  \end{block}
+  \begin{alertblock}{Raspuns final}
+    \footnotesize
+    $\text{Raspuns} = \sum_{\text{muchii}} \text{lungime} + \text{cost minim FMCM}$
+  \end{alertblock}
+\end{frame}
+
+\begin{frame}{Traseu --- De ce functioneaza}
+  \begin{columns}[T]
+  \column{0.52\textwidth}
+    \begin{block}{Interpretarea fluxului}
+      \begin{scriptsize}
+      \begin{itemize}\itemsep0pt
+        \item Flux $u\to v$ = traversare suplimentara pe drumul scurt $u\to v$
+        \item Adauga $+1$ la $\deg^+(u)$ si $+1$ la $\deg^-(v)$
+        \item Dupa FMCM: graful (original $+$ traversari) devine Eulerian
+      \end{itemize}
+      \end{scriptsize}
+    \end{block}
+    \smallskip
+    \begin{exampleblock}{Detectare imposibilitate}
+      \begin{scriptsize}
+      Floyd-Warshall da $\dist(u,v)=\infty$ pt. o pereche necesara
+      $\Rightarrow$ graful nu e conex tare $\Rightarrow$ imposibil.
+      \end{scriptsize}
+    \end{exampleblock}
+  \column{0.46\textwidth}
+    \begin{alertblock}{Complexitate}
+      \begin{scriptsize}
+      \begin{itemize}\itemsep0pt
+        \item Floyd-Warshall: $O(N^3)$
+        \item FMCM: $O(F\!\cdot\! N^2\log N)$, $F\leq M$
+        \item Total: $O(N^3 + M\!\cdot\! N^2\log N)$
+        \item $N\leq 60$, $M\leq 1000$: rapid
+      \end{itemize}
+      \end{scriptsize}
+    \end{alertblock}
+    \begin{block}{Link}
+      \footnotesize
+      \href{https://www.infoarena.ro/problema/traseu}{\textbf{infoarena.ro/problema/traseu}}
+    \end{block}
+  \end{columns}
+\end{frame}
+
+% ---- Hoata ----
+\subsection*{Hoata (ONI 2022 Baraj 2)}
+
+\begin{frame}[shrink]{Hoata --- Enunt}
+  \begin{block}{Problema}
+    Muzeu cu $N$ camere liniare. Camera $i$ are rezerve infinite de lingouri de valoare $v_i$
+    si greutate $g_i$. Intra $K$ hoti, fiecare cu rucsac de capacitate $G$ (initial gol).\\
+    \smallskip
+    La fiecare pas $i$: toti hotii avanseaza din camera $i$ in camera $i+1$.
+    Alarma $i$ (intre camerele $i$ si $i+1$): se declanseaza daca $\geq x_i+1$ hoti
+    au \alert{aceeasi greutate totala} in rucsac la acel moment.\\
+    \smallskip
+    Maximizati captura totala, sau $-1$ daca hotii sunt prinsi indiferent ce fac.
+  \end{block}
+  \begin{exampleblock}{Exemplu: $N=2$, $K=2$, $G=3$; cam.\,1: $v=10,g=2,x=1$; cam.\,2: $v=9,g=1,x=2$}
+    \footnotesize
+    Hotul 1: ia 1 lingou din cam.\,1 (greutate 2) + 1 din cam.\,2 (greutate 3, valoare 19).\\
+    Hotul 2: ia 3 lingouri din cam.\,2 (greutate 3, valoare 27).\\
+    Dupa cam.\,1: greutati $\{2, 0\}$ \textemdash{} diferite, alarma 1 ($x_1=1$) nu suna.\\
+    La iesire: greutati $\{3, 3\}$ \textemdash{} alarma 2 cere $\geq 3$ cu aceeasi greutate; doar 2, deci OK.\\
+    Total: $\mathbf{46}$.
+  \end{exampleblock}
+\end{frame}
+
+\begin{frame}[shrink]{Hoata --- Modelarea ca flux}
+  \begin{block}{Observatia cheie: profilul de greutate}
+    Fiecare hot urmeaza un ``profil de greutate'': secventa de greutati
+    $(w_0{=}0, w_1, \ldots, w_N)$ cu $0\leq w_{i-1}\leq w_i\leq G$
+    si $(w_i - w_{i-1})$ divizibil cu $g_i$.\\
+    Valoarea unui profil: $\displaystyle\sum_{i=1}^{N}\frac{w_i - w_{i-1}}{g_i}\cdot v_i$.\\
+    Constrangerea alarmei $i$: cel mult $x_i$ hoti pot avea aceeasi valoare $w_i$.
+  \end{block}
+  \begin{block}{Graf de flux: straturi (camere) $\times$ greutati}
+    \begin{footnotesize}
+    Noduri $(i, w)$ pentru $0\leq i\leq N$, $0\leq w\leq G$.\\
+    \begin{itemize}
+      \item $S \to (0, 0)$: cap $=K$, cost $=0$ (toti hotii incep cu greutate 0)
+      \item $(i-1, w) \to (i, w')$ cu $w'=w+j\cdot g_i$, $j\geq 0$: cap $=K$,
+            cost $= -j\cdot v_i$ (negat pentru maximizare), daca $w'\leq G$
+      \item Fiecare $(i, w)$ cu $i\geq 1$: \textit{split} in $(i,w)_{in}\to(i,w)_{out}$ cu cap $=x_i$
+            (constrangerea alarmei $i$; la $i=0$ nu exista alarma)
+      \item $(N, w)_{out} \to T$: cap $=K$, cost $=0$ (iesire cu orice greutate)
+    \end{itemize}
+    \end{footnotesize}
+  \end{block}
+\end{frame}
+
+\begin{frame}{Hoata --- FMCM si detectarea $-1$}
+  \begin{columns}[T]
+  \column{0.55\textwidth}
+    \begin{block}{Rezolvare}
+      \begin{footnotesize}
+      Rulam FMCM pentru $K$ unitati de flux de la $S$ la $T$.
+      \begin{itemize}\itemsep0pt
+        \item Flux maxim $< K$: \textbf{output $-1$}\\
+              (capacitatile $x_i$ nu permit $K$ hoti)
+        \item Flux $= K$: raspuns $= -\text{cost\_minim}$\\
+              (costuri negative $=$ profit maxim)
+      \end{itemize}
+      \end{footnotesize}
+    \end{block}
+    \smallskip
+    \begin{exampleblock}{Exemplu $K=3$: imposibil}
+      \footnotesize
+      Dupa cam.\,1 ($g_1=2$, $G=3$): greutatile posibile $0$ sau $2$.
+      Cu $x_1=1$: max $1$ hot/greutate $\Rightarrow$ max $2$ hoti.
+      $3>2 \Rightarrow$ flux $= 2 < K=3 \Rightarrow -1$.
+    \end{exampleblock}
+  \column{0.43\textwidth}
+    \begin{alertblock}{Complexitate}
+      \begin{footnotesize}
+      \begin{itemize}\itemsep0pt
+        \item Noduri: $O(N\!\cdot\! G)$
+        \item Muchii: $O(N\!\cdot\! G^2)$
+        \item Faze Dijkstra: $\leq K$
+        \item Total: $O(K\!\cdot\! N\!\cdot\! G^2\!\cdot\!\log(NG))$
+        \item OK pentru $N,G\leq 300$, $K\leq 50$
+      \end{itemize}
+      \end{footnotesize}
+    \end{alertblock}
+    \begin{block}{Link}
+      \footnotesize
+      \href{https://code.algolymp.com/problems/152}{\textbf{AlgoCode: Hoata (P. 152)}}
+    \end{block}
+  \end{columns}
+\end{frame}
+
+% ---- Red-Blue Graph ----
+\subsection*{Red-Blue Graph (CF 1288F)}
+
+\begin{frame}{Red-Blue Graph --- Enunt (CF 1288F)}
+  \begin{block}{Problema}
+    Graf bipartit cu $n_1+n_2$ varfuri si $m$ muchii. Fiecare varf este colorat
+    \textcolor{red}{\textbf{R}}, \textcolor{blue}{\textbf{B}}, sau \textbf{U} (necolorat).
+    Fiecare muchie poate fi colorata \textcolor{red}{\textbf{R}} (cost $r$),
+    \textcolor{blue}{\textbf{B}} (cost $b$), sau lasata \textbf{U} (cost $0$), astfel incat:
+    \begin{itemize}
+      \item Varf \textcolor{red}{\textbf{R}}: \#muchii\_rosii $>$ \#muchii\_albastre la el
+      \item Varf \textcolor{blue}{\textbf{B}}: \#muchii\_albastre $>$ \#muchii\_rosii la el
+      \item Varf \textbf{U}: nicio constrangere
+    \end{itemize}
+    Gasiti colorarea de cost total minim, sau $-1$ daca nu exista.
+  \end{block}
+  \begin{exampleblock}{Constrangeri}
+    \footnotesize
+    $n_1, n_2, m, r, b \leq 200$. Graful bipartit: varfuri stanga $L$ si dreapta $R$.
+  \end{exampleblock}
+\end{frame}
+
+\begin{frame}[shrink]{Red-Blue Graph --- Modelarea ca flux}
+  \begin{block}{Idee cheie: colorare $=$ directia fluxului}
+    Fiecare muchie originala $(u,v)$ cu $u\in L$, $v\in R$ devine:
+    \begin{itemize}
+      \item Muchia colorata \textcolor{red}{\textbf{R}} = flux de la stanga la dreapta: $u\to v$
+      \item Muchia colorata \textcolor{blue}{\textbf{B}} = flux de la dreapta la stanga: $v\to u$
+      \item Muchia \textbf{U} = niciun flux pe ea
+    \end{itemize}
+    Punem costuri pe muchii: $u\to v$ cu cap $=1$, cost $=r$;
+    si $v\to u$ cu cap $=1$, cost $=b$.
+  \end{block}
+  \begin{block}{Constrangerile pe varfuri se traduc ca limite inferioare pe flux}
+    \begin{footnotesize}
+    Fie $u\in L$ (stanga). Fluxul net OUT din $u$ catre $R$ = \#rosii $-$ \#albastre la $u$.\\
+    \begin{itemize}
+      \item $u$ este \textcolor{red}{\textbf{R}}: flux net $>0$ $\Rightarrow$ adaugam $S\to u$
+            cu limita inf.\ $1$, capacitate $\infty$, cost $0$.
+      \item $u$ este \textcolor{blue}{\textbf{B}}: flux net $<0$ $\Rightarrow$ adaugam $u\to T$
+            cu limita inf.\ $1$, capacitate $\infty$, cost $0$.
+      \item $u$ este \textbf{U}: adaugam $S\to u$ si $u\to T$ ambele cu cap $\infty$, cost $0$
+            (echilibram liber).
+    \end{itemize}
+    Varfurile din $R$ (dreapta): simetric (rolurile $S$ si $T$ sunt inversate).
+    \end{footnotesize}
+  \end{block}
+\end{frame}
+
+\begin{frame}{Red-Blue Graph --- Constructia si detectarea imposibilitatii}
+  \begin{block}{Tehnica fluxului cu cerinte minime}
+    \begin{scriptsize}
+    Limita inferioara $l$ pe muchia $x\to y$: doua muchii:
+    \begin{itemize}\itemsep0pt
+      \item $x\to y$: cap $=l$, cost $=-\mathrm{BIG}$ (forteaza saturarea)
+      \item $x\to y$: cap $=\infty$, cost $=0$ (capacitate optionala)
+    \end{itemize}
+    Alternativ: super-sursa/super-destinatie auxiliara.
+    \end{scriptsize}
+  \end{block}
+  \vspace{-6pt}
+  \begin{alertblock}{Detectare $-1$}
+    \begin{scriptsize}
+    \begin{itemize}\itemsep0pt
+      \item \textbf{Cost negativ:} daca cost minim $< 0$ $\Rightarrow$ limite inferioare nesatisfacute $\Rightarrow$ $-1$.\\
+            Concret: cost $< -\mathrm{BIG}\cdot(\#\text{varfuri colorate})$.
+      \item \textbf{Super-nod:} daca fluxul maxim pe super-nod auxiliar nu satureaza
+            toate muchiile cu limita inferioara $\Rightarrow$ $-1$.
+    \end{itemize}
+    \end{scriptsize}
+  \end{alertblock}
+  \vspace{-6pt}
+  \begin{block}{Complexitate}
+    \footnotesize
+    $V=O(n_1{+}n_2)$, $E=O(m{+}n_1{+}n_2)$, $F=O(n_1{+}n_2)$. Total: $O(F\!\cdot\! E\log V)$.\\
+    \href{https://codeforces.com/contest/1288/problem/F}{\textbf{codeforces.com/contest/1288/problem/F}}\\
+    \textit{Lower bounds:} \href{https://usaco.guide/adv/flow-lb?lang=cpp}{\textbf{USACO Guide --- Flow with Lower Bounds}}
+  \end{block}
+\end{frame}
+
+% ================================================================
+\section*{Resurse si Probleme de antrenament}
+
+\begin{frame}{Resurse recomandate}
+  \begin{itemize}
+    \footnotesize
+    \item \href{https://cp-algorithms.com/graph/min_cost_flow.html}{\textbf{cp-algorithms.com} --- Flux de Cost Minim}
+          \textemdash{} explicatii detaliate, implementari Bellman-Ford si Dijkstra, exemple
+    \smallskip
+    \item \href{https://usaco.guide/adv/min-cost-flow?lang=cpp}{\textbf{USACO Guide} --- Flux de Cost Minim}
+          \textemdash{} perspectiva competitii, template C++, probleme practice cu solutii
+    \smallskip
+    \item \href{https://en.wikipedia.org/wiki/Minimum-cost_flow_problem}{\textbf{Wikipedia} --- Minimum-cost flow problem}
+          \textemdash{} formulare LP, algoritmi clasici (network simplex, scaling), bibliografie
+    \smallskip
+    \item \href{https://codeforces.com/blog/entry/105330}{\textbf{CF Blog 105330} --- Tutorial FMCM (by -is-this-fft-)}
+          \textemdash{} tratare formala si riguroasa: definitii, conditia de optimalitate, algoritm Bellman-Ford
+    \smallskip
+    \item \href{https://codeforces.com/blog/entry/95823}{\textbf{CF Blog 95823} --- Potentiale Johnson si FMCM}
+          \textemdash{} motivatia potentialelor, derivare, aplicare pentru Dijkstra cu costuri negative
+    \smallskip
+    \item \href{https://cp-algorithms.com/graph/bellman_ford.html}{\textbf{cp-algorithms.com} --- Bellman-Ford}
+          \textemdash{} algoritmul de baza pentru drumuri cu costuri negative
+    \smallskip
+    \item \href{https://usaco.guide/adv/flow-lb?lang=cpp}{\textbf{USACO Guide} --- Flux cu Limite Inferioare}
+          \textemdash{} circulatie fezabila, flux fezabil S-T, flux maxim/minim cu lower bounds
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Probleme de antrenament}
+  \begin{itemize}
+    \footnotesize
+    \item \href{https://www.infoarena.ro/problema/traseu}{\textbf{Traseu} (infoarena)}
+          \textemdash{} Chinese Postman pe digraf, reducere la FMCM pe dezechilibre
+    \smallskip
+    \item \href{https://codeforces.com/contest/1288/problem/F}{\textbf{CF 1288F --- Red-Blue Graph}}
+          \textemdash{} colorare bipartita cu constrangeri, flux cu limite inferioare
+          \quad\href{https://codeforces.com/blog/entry/73105}{[editorial]}
+    \smallskip
+    \item \href{https://code.algolymp.com/problems/152}{\textbf{Hoata} (ONI 2022 Baraj 2)}
+          \textemdash{} $K$ hoti cu constrangeri de greutate, graful in straturi greutate$\times$camera
+          \quad\href{https://github.com/roalgo-discord/Romanian-Olympiad-Solutions/blob/main/Baraj\%20\%2B\%20Lot\%20Seniori\%20(IOI\%20team\%20selection\%20tests)/2022/Baraj\%201\%2B2.pdf}{[editorial]}
+    \smallskip
+    \item \href{https://code.algolymp.com/problems/3450}{\textbf{Jamne} (Algolymp Contest F)}
+          \textemdash{} transformari de litere, Floyd-Warshall + FMCM pe 54 noduri
+          \quad\href{https://kilonova.ro/pastes/2toYPVYSuFo9}{[solutie]}
+          \href{https://kilonova.ro/pastes/vVRWJKiwROrD}{[solutie alternativa]}
+    \smallskip
+    \item \href{https://kilonova.ro/problems/434}{\textbf{Terenuri 3D} (kilonova)}
+          \textemdash{} FMCM pe o structura 3D, modelare netriviala
+          \quad\href{https://kilonova.ro/submissions/534618}{[implementare]}
+    \smallskip
+    \item \href{https://codeforces.com/problemset/problem/818/G}{\textbf{CF 818G --- Four Melodies}}
+          \textemdash{} gaseste 4 melodii disjuncte de lungime maxima intr-un sir de note
+          \quad\href{https://codeforces.com/blog/entry/52991}{[editorial]}
+  \end{itemize}
+\end{frame}
+
+\end{document}

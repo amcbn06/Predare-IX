@@ -1,0 +1,472 @@
+\documentclass[10pt]{beamer}
+\usepackage{../../../resources/themes/algolymp-dense}
+
+\title{Algoritmul lui Dijkstra}
+\subtitle{Drumuri minime în grafuri ponderate}
+\author{Andrei Mihai Ciobanu}
+\institute{Algolymp Summer School}
+\date{}
+\titlegraphic{\includegraphics[width=3cm]{../../../resources/algolymp-logo.png}}
+\setbeamertemplate{frame footer}{Algolymp \textemdash{} Lot Juniori}
+
+% ================================================================
+\begin{document}
+
+\begin{frame}
+  \titlepage
+\end{frame}
+
+\begin{frame}{Cuprins}
+  \tableofcontents[hideallsubsections]
+\end{frame}
+
+% ================================================================
+\section{De la BFS la Dijkstra}
+
+\begin{frame}{BFS și grafuri ponderate}
+  BFS garantează drumuri minime când toate muchiile au costul 1.
+
+  \begin{block}{Invariant BFS}
+    Nodurile se procesează în ordine crescătoare a \textbf{numărului de muchii}
+    față de sursă. La runda $k$: toate nodurile la distanță exact $k$ muchii.
+  \end{block}
+
+  \begin{alertblock}{Problema cu costuri diferite}
+    O muchie de cost 5 e tratată identic cu una de cost 1.
+    BFS nu consideră costurile \textemdash{} ordinea de procesare nu mai reflectă distanța reală.
+  \end{alertblock}
+
+  \smallskip
+  \textbf{Generalizare:} dacă, în loc de numărul de muchii, am procesa nodurile
+  în ordinea \textbf{distanței curente față de sursă}, algoritmul ar fi corect
+  pe grafuri ponderate. Aceasta este ideea algoritmului lui \textbf{Dijkstra}.
+\end{frame}
+
+\begin{frame}{BFS pe grafuri ponderate}
+  \begin{columns}[T]
+  \column{0.44\textwidth}
+    \vspace{4pt}
+    \begin{center}
+    \begin{tikzpicture}[scale=0.9]
+      \node[nd,src] (1) at (0,0)    {1};
+      \node[nd]     (2) at (2,0.9)  {2};
+      \node[nd]     (3) at (2,-0.9) {3};
+      \draw[eg] (1) to node[elbl,above left] {1} (2);
+      \draw[eg] (1) to node[elbl,below left] {4} (3);
+      \draw[eg] (2) to node[elbl,right]      {1} (3);
+    \end{tikzpicture}
+    \end{center}
+    \begin{block}{3 noduri, 3 muchii}
+      $1\!\to\!2$: cost 1 \\
+      $1\!\to\!3$: cost 4 \\
+      $2\!\to\!3$: cost 1
+    \end{block}
+  \column{0.54\textwidth}
+    \begin{block}{BFS din nodul 1}
+      Runda 1: marchează 2 și \textbf{3} (vecini direcți ai lui 1).\\
+      \textbf{BFS returnează:} 1 muchie parcursă la nodul 3
+    \end{block}
+    \begin{alertblock}{Distanță minimă reală: 2}
+      Drumul $1\!\to\!2\!\to\!3$ are cost $1+1=2$.\\
+      Drumul direct $1\!\to\!3$ are cost $4$.\\
+      \textbf{BFS nu consideră costurile \textemdash{} returnează număr de muchii, nu cost.}
+    \end{alertblock}
+    \smallskip
+    Dijkstra alege $1\!\to\!2\!\to\!3$ cu cost 2. $\checkmark$
+  \end{columns}
+\end{frame}
+
+% ================================================================
+\section{Algoritmul lui Dijkstra}
+
+\begin{frame}{Dijkstra \textemdash{} ideea algoritmului}
+  \textbf{Input:} graf $G=(V,E)$, costuri $w\geq 0$, sursă $s$.
+  
+  \textbf{Output:} $d[u]$ \textemdash{} distanța minimă de la $s$ la $u$.
+
+  \smallskip
+  \textbf{Structuri de date:}
+  \begin{itemize}
+    \item $d[u]$ \textemdash{} distanța curentă de la $s$ la $u$
+    \item $vis[u]$ \textemdash{} dacă nodul $u$ a fost \textbf{marcat} (vizitat)
+  \end{itemize}
+
+  Inițial: $d[s]=0$, $d[u]=\infty$ pentru $u\neq s$; $vis[u]=\text{false}$ pentru oricare $u$.
+
+  \smallskip
+
+  Algoritmul execută \textbf{$n$ iterații}. La fiecare iterație:
+  \begin{enumerate}
+    \item Alege nodul nemarcat $u$ cu $d[u]$ \textbf{minim}.
+          Dacă $d[u]=\infty$, nodurile rămase sunt inaccesibile \textemdash{} ne oprim.
+    \item Marchează $u$: $vis[u] \leftarrow \text{true}$.
+    \item \textbf{Relaxare:} pentru fiecare muchie $(u,\,v)$ de cost $w$:
+          dacă $d[u]+w < d[v]$, actualizăm $d[v] \leftarrow d[u]+w$ (adică vizităm vecinii și le actualizăm distanța dacă putem).
+  \end{enumerate}
+
+  La final, $d[u]$ conține distanța minimă de la $s$ la $u$ pentru orice nod $u$.
+\end{frame}
+
+\begin{frame}{Dijkstra \textemdash{} complexitate}
+  \textbf{Câte operații facem per iterație?}
+  \begin{itemize}
+    \item \textbf{Căutarea minimului} (pasul 1): parcurgem toate cele $n$ noduri pentru a găsi nodul $u$ nemarcat cu $d[u]$ minim \textemdash{} $O(n)$
+    \item \textbf{Relaxare} (pasul 3): fiecare muchie e relaxată cel mult o dată \textemdash{} $O(m)$ total
+  \end{itemize}
+
+  \smallskip
+  \textbf{Total pentru cele $n$ iterații:}
+  \[ O(n) \times n \text{ iterații} + O(m) = O(n^2 + m) \]
+
+  \begin{block}{Când este $O(n^2+m)$ optim?}
+    Pe grafuri \textbf{dense} ($m \approx n^2$): $O(n^2+m) = O(n^2)$ \textemdash{} nu putem face mai bine.\\
+    Pe grafuri \textbf{rare} ($m \ll n^2$): primul termen domină, putem îmbunătăți.
+  \end{block}
+
+  \begin{alertblock}{Optimizare pentru grafuri rare}
+    Dacă extragem minimul cu un \textbf{min-heap} în loc de scanare liniară:
+    $O(\log n)$ per extragere $\Rightarrow$ total $O((n+m)\log n)$.
+  \end{alertblock}
+\end{frame}
+
+\begin{frame}{Exemplu}
+  \begin{columns}[T]
+  \column{0.3\textwidth}
+    \begin{center}
+    \begin{tikzpicture}[scale=1.1]
+      \node[nd,src] (1) at (1,2.4)   {1};
+      \node[nd]     (2) at (0,1.2)   {2};
+      \node[nd]     (3) at (2,1.2)   {3};
+      \node[nd]     (4) at (0,0)     {4};
+      \node[nd]     (5) at (1.6,0)   {5};
+      \draw[eg] (1) to node[elbl,above left]  {2} (2);
+      \draw[eg] (1) to node[elbl,above right] {6} (3);
+      \draw[eg] (2) to node[elbl,left]        {1} (4);
+      \draw[eg] (2) to node[elbl,right]       {3} (5);
+      \draw[eg] (4) to node[elbl,below]       {1} (5);
+      \draw[eg] (3) to node[elbl,right]       {4} (5);
+    \end{tikzpicture}
+    \end{center}
+  \column{0.54\textwidth}
+    \vspace{4pt}
+    {\footnotesize
+    \begin{tabular}{r|lrrrrr}
+      \toprule
+      Pas & Ales & $d[1]$ & $d[2]$ & $d[3]$ & $d[4]$ & $d[5]$ \\
+      \midrule
+      Init & \textemdash{} & 0 & $\infty$ & $\infty$ & $\infty$ & $\infty$ \\
+      1    & 1             & 0 & 2        & 6        & $\infty$ & $\infty$ \\
+      2    & 2             & 0 & 2        & 6        & 3        & 5        \\
+      3    & 4             & 0 & 2        & 6        & 3        & \textbf{4} \\
+      4    & 5             & 0 & 2        & 6        & 3        & 4        \\
+      5    & 3             & 0 & 2        & 6        & 3        & 4        \\
+      \bottomrule
+    \end{tabular}
+    }
+    \smallskip
+    \begin{block}{Rezultat: $dist = [0,\ 2,\ 6,\ 3,\ 4]$}
+      Drum optim la 5: $1\!\to\!2\!\to\!4\!\to\!5$, cost $2+1+1=4$.
+    \end{block}
+  \end{columns}
+\end{frame}
+
+% ================================================================
+\section{Implementare}
+
+\begin{frame}{Optimizare pentru grafuri rare}
+  Pe grafuri rare ($m \ll n^2$), termenul $O(n)$ per extragere domină.
+  Soluție: structură de date cu extragerea minimului în $O(\log n)$.
+
+  \smallskip
+  C++ pune la dispoziție două opțiuni:
+
+  \begin{block}{\texttt{set<pair<int,int>{}>}}
+    Suportă ștergerea și extragerea minimului în $O(\log n)$.
+    Stocăm perechi $(\text{dist}[v], v)$.
+    La relaxare: ștergem perechea veche, inserăm perechea nouă.
+    \texttt{set}-ul conține mereu exact nodurile în așteptare (cel mult $n$ elemente).
+  \end{block}
+
+  \begin{block}{\texttt{priority\_queue}}
+    Constantă mai mică decât \texttt{set}.
+    Extragerea minimului în $O(\log n)$.
+    \textbf{Limitare:} nu suportă ștergerea unui element arbitrar.
+  \end{block}
+\end{frame}
+
+\begin{frame}{\texttt{priority\_queue} \textemdash{} duplicate și complexitate}
+  Fără posibilitate de ștergere, la relaxare \textbf{nu eliminăm} perechea veche
+  \textemdash{} inserăm pur și simplu perechea nouă $(\text{dist}[v], v)$.
+
+  \smallskip
+  \textbf{Consecință:} un nod poate apărea de \textbf{mai multe ori} în heap.
+  \begin{itemize}
+    \item La extragerea $(d, v)$: dacă $d > \text{dist}[v]$ \textemdash{}
+          intrare \textbf{veche}, ignorăm (\texttt{continue}).
+    \item Fiecare relaxare produce un push \textemdash{} cel mult $O(m)$ push-uri total.
+    \item Fiecare push produce exact un pop \textemdash{} deci $O(m)$ pop-uri total.
+    \item Heap-ul crește la $O(m)$ elemente $\Rightarrow$ fiecare push/pop: $O(\log m)$.
+  \end{itemize}
+
+  \begin{alertblock}{Constantă \textemdash{} $O(\log m)$ vs.\ $O(\log n)$}
+    De cele mai multe ori $m > n$, deci $\log m > \log n$, însă cele două sunt asimptotic
+    identice: $m \leq n^2 \Rightarrow \log m \leq 2\log n$.
+    În practică \texttt{priority\_queue} rămâne preferată: constanta mai mică față
+    de \texttt{set} compensează factorul $\log m$ ușor mai mare.
+  \end{alertblock}
+
+  \textbf{Total:} $O(m)$ push-uri $+$ $O(m)$ pop-uri, fiecare $O(\log m)$:
+  \[ O(m \log m) = O(m \log n) \]
+\end{frame}
+
+\begin{frame}[shrink, fragile]{Implementare cu \texttt{priority\_queue} \textemdash{} $O(m \log n)$}
+\begin{lstlisting}
+int n, m;
+vector<pair<int, int>> g[nmax + 1]; // g[u] = { { v, w }, ... }
+
+vector<int> dijkstra(int src) {
+    vector<int> dist(n + 1, inf);
+    priority_queue<pair<int, int>, vector<pair<int, int>>, greater<pair<int, int>>> pq;
+    dist[src] = 0;
+    pq.push({ 0, src });
+    while (!pq.empty()) {
+        // extragem nodul cel mai apropiat
+        int d = pq.top().first;
+        int u = pq.top().second;
+        pq.pop();
+        // daca e o intrare outdated (am gasit o distanta mai buna intre timp), abandonam
+        if (d > dist[u]) {
+            continue;
+        }
+        // relaxam
+        for (auto& e : g[u]) {
+            int v = e.first, w = e.second;
+            if (dist[u] + w < dist[v]) {
+                dist[v] = dist[u] + w;
+                pq.push({ dist[v], v });
+            }
+        }
+    }
+    return dist;
+}
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]{Citire și apel}
+\begin{lstlisting}
+int main() {
+    cin >> n >> m;
+    for (int i = 0; i < m; i++) {
+        int u, v, w;
+        cin >> u >> v >> w;
+        g[u].push_back({ v, w });
+        // pentru graf neorientat adaugam si muchia inversa:
+        // g[v].push_back({ u, w });
+    }
+
+    vector<int> dist = dijkstra(1);
+    for (int i = 2; i <= n; i++) {
+        cout << (dist[i] == inf ? -1 : dist[i]) << " ";
+    }
+    return 0;
+}
+\end{lstlisting}
+  \beginnote{Atenție la tipul datelor: dacă $n, m \leq 10^5$ și costurile $\leq 10^9$, distanțele pot depăși \texttt{int}. În acest caz folosim \texttt{long long} și $inf = 10^{18}$.}
+\end{frame}
+
+\begin{frame}[fragile, shrink=10]{Restaurarea drumului minim}
+  Pe lângă distanțe, putem reconstitui și drumul: păstrăm \textbf{$p[v]$}
+  \textemdash{} predecesorul lui $v$ pe drumul minim de la sursă.
+
+  \textbf{Modificare în \texttt{dijkstra}} \textemdash{} adăugăm $p[]$ și îl actualizăm la relaxare:
+\begin{lstlisting}
+vector<int> dijkstra(int src) {
+    vector<int> dist(n + 1, inf);
+    vector<int> p(n + 1, -1);      // p[v] = predecesorul lui v
+    // ...
+    for (auto& e : g[u]) {
+        int v = e.first, w = e.second;
+        if (dist[u] + w < dist[v]) {
+            dist[v] = dist[u] + w;
+            p[v] = u;              // actualizam predecesorul
+            pq.push({ dist[v], v });
+        }
+    }
+    // ...
+}
+\end{lstlisting}
+
+\textbf{Reconstituire} \textemdash{} pornim din $t$, urmăm $p[]$ până la sursă, inversăm:
+\begin{lstlisting}
+vector<int> get_path(int t) {
+    vector<int> path;
+    for (int v = t; v != -1; v = p[v]) {
+        path.push_back(v);
+    }
+    reverse(path.begin(), path.end());
+    return path; // P = (s, ..., p[p[t]], p[t], t)
+}
+\end{lstlisting}
+\end{frame}
+
+
+% ================================================================
+\section{Corectitudine și limitări}
+
+\begin{frame}[shrink]{De ce funcționează Dijkstra?}
+  \begin{block}{Afirmație}
+    Când extragem $(dist[v], v)$ din heap, $dist[v]$ este distanța minimă reală de la $s$ la $v$ și nodul $v$ nu va mai fi considerat de acum încolo.
+  \end{block}
+
+  Presupunem că există un drum mai bun $P: s \to \cdots \to v$ cu cost $< dist[v]$.
+
+  \smallskip
+  \textbf{Cazul 1 \textemdash{} $P$ trece doar prin noduri marcate.}\\
+  Toate relaxările de pe $P$ au fost deja efectuate $\Rightarrow$ $dist[v] \leq \text{cost}(P)$.
+  Contradicție.
+
+  \smallskip
+  \textbf{Cazul 2 \textemdash{} $P$ trece printr-un nod nemarcat $u$.}\\
+  Deoarece extragem $v$ \textbf{înainte} de $u$ din heap: $dist[v] \leq dist[u]$.\\
+  Predecesorul lui $u$ pe $P$ e marcat și deja procesat, deci $dist[u] \leq \text{cost}(s \to \cdots \to u \text{ în } P)$.\\
+  Costul total al lui $P$:
+  \[
+    \text{cost}(P)
+    = \underbrace{\text{cost}(s \to \cdots \to u)}_{\geq\; dist[u]}
+    + \underbrace{\text{cost}(u \to \cdots \to v)}_{\geq\; 0}
+    \;\geq\; dist[u] \;\geq\; dist[v]
+  \]
+  Contradicție \textemdash{} $P$ nu e mai scurt. Deci $dist[v]$ este corect. \checkmark
+\end{frame}
+
+\begin{frame}{De ce nu merge cu costuri negative?}
+  \begin{block}{Ipoteza nu mai e validă}
+    Demonstrația s-a bazat pe $\text{cost}(u \to \cdots \to v) \geq 0$.
+    Cu costuri negative, $\text{cost}(P)$ poate fi $< dist[v]$
+    chiar dacă $dist[v] \leq dist[u]$ \textemdash{} dar nodul $v$ e deja
+    finalizat și nu mai poate fi revizitat.
+  \end{block}
+
+  \smallskip
+  \begin{block}{Soluție: Bellman-Ford}
+    Relaxează \textbf{toate} cele $m$ muchii de $n-1$ ori.
+    Nu face presupuneri despre ordinea optimă \textemdash{} fiecare iterație
+    poate îmbunătăți orice nod.
+    \begin{itemize}
+      \item Complexitate: $O(nm)$ față de $O(m \log n)$ la Dijkstra
+      \item Funcționează cu costuri negative
+      \item Detectează cicluri negative (dacă după $n-1$ iterații
+            mai există relaxări posibile, există un ciclu negativ)
+    \end{itemize}
+  \end{block}
+\end{frame}
+
+% ================================================================
+\section{Variații}
+
+\begin{frame}[fragile, shrink]{Multi-source Dijkstra}
+  \begin{block}{Problemă: mai multe surse}
+    Vrem distanța minimă de la \textbf{oricare} nod din mulțimea $S$
+    la fiecare nod din graf.
+    Exemplu: distanța minimă de la orice capitală la fiecare oraș.
+  \end{block}
+
+  \begin{block}{Soluție: inițializare multiplă}
+    Inițializăm $dist[s_i] = 0$ pentru toți $s_i \in S$
+    și inserăm toate sursele în heap de la început.
+    Restul algoritmului e identic.
+  \end{block}
+
+\begin{lstlisting}
+vector<int> multi_dijkstra(vector<int>& sources) {
+    vector<int> dist(n + 1, inf);
+    priority_queue<pair<int, int>, vector<pair<int, int>>,
+                   greater<pair<int, int>>> pq;
+    for (int s : sources) {
+        dist[s] = 0;
+        pq.push({0, s});
+    }
+    while (!pq.empty()) { /* ... restul identic cu dijkstra */ }
+    return dist;
+}
+\end{lstlisting}
+  \beginnote{Echivalent cu adăugarea unui nod virtual $0$ cu muchii de cost 0 la fiecare sursă.}
+\end{frame}
+
+\begin{frame}{Tabel comparativ}
+  \begin{center}
+  \begin{tabular}{llll}
+    \toprule
+    Algoritm & Costuri & Complexitate & Observații \\
+    \midrule
+    BFS & $1$ & $O(n+m)$ & \textemdash{} \\
+    Dijkstra & $\geq 0$ & $O(m\log n)$ & \texttt{priority\_queue} \\
+    Bellman-Ford & orice & $O(nm)$ & detectează cicluri $<0$ \\
+    \bottomrule
+  \end{tabular}
+  \end{center}
+
+  \begin{alertblock}{Când să folosești Bellman-Ford în loc de Dijkstra?}
+    \begin{itemize}
+      \item Costuri negative pe muchii (fără cicluri negative)
+      \item Vrei să detectezi cicluri de cost negativ
+    \end{itemize}
+  \end{alertblock}
+  \beginnote{Dijkstra cu \texttt{priority\_queue} pe grafuri rare e $O(m \log n)$;
+             pe grafuri dense alternativa cu extragerea naivă a minimului e mai rapidă.}
+\end{frame}
+
+% ================================================================
+\section{Recapitulare}
+
+\begin{frame}{Recapitulare}
+  \begin{itemize}
+    \item \textbf{Dijkstra} \textemdash{} \textbf{S}ingle \textbf{S}ource \textbf{S}hortest \textbf{P}aths (SSSP) pe grafuri cu $w \geq 0$;
+          greedy: extrage la fiecare pas nodul nefinalizat cu distanța minimă
+    \item Cu \texttt{priority\_queue}: permitem intrări duplicate dar le ignorăm când le extragem din heap
+    \item Costuri negative $\Rightarrow$ \textbf{Bellman-Ford}: relaxează toate muchiile de $n-1$ ori,
+          detectează cicluri negative
+  \end{itemize}
+
+  \smallskip
+  \begin{center}
+  \begin{tabular*}{0.7\linewidth}{@{\extracolsep{\fill}}lcc}
+    \toprule
+    Algoritm & Condiție & Complexitate \\
+    \midrule
+    BFS                    & $w = 1$    & $O(n + m)$    \\
+    Dijkstra naiv          & $w \geq 0$ & $O(n^2 + m)$  \\
+    Dijkstra + \texttt{pq} & $w \geq 0$ & $O(m \log n)$ \\
+    Bellman-Ford           & \textemdash{}  & $O(nm)$       \\
+    \bottomrule
+  \end{tabular*}
+  \end{center}
+\end{frame}
+
+\begin{frame}{Probleme de antrenament}
+  \begin{enumerate}
+    \item \href{https://infoarena.ro/problema/dijkstra}{\textbf{Dijkstra}}
+          \textcolor{gray}{(infoarena \textemdash{} Arhiva Educațională)}
+    \item \href{https://infoarena.ro/problema/dmin}{\textbf{Drumuri minime}}
+          \textcolor{gray}{(infoarena \textemdash{} preONI 2006 R4)}
+    \item \href{https://infoarena.ro/problema/patrol}{\textbf{Patrol}}
+          \textcolor{gray}{(infoarena)}
+    \item \href{https://infoarena.ro/problema/catun}{\textbf{Catun}}
+          \textcolor{gray}{(infoarena)}
+    \item \href{https://code.algolymp.com/problems/52}{\textbf{dragoni}}
+          \textcolor{gray}{(AlgoCode \#52)}
+  \end{enumerate}
+\end{frame}
+
+\begin{frame}[fragile]{Resurse}
+  \begin{enumerate}
+    \item \href{https://cp-algorithms.com/graph/dijkstra.html}{\textbf{CP-Algorithms} \textemdash{} Dijkstra Algorithm}
+          \textemdash{} teorie, dovadă, implementare (EN)
+    \item \href{https://cp-algorithms.com/graph/dijkstra_sparse.html}{\textbf{CP-Algorithms} \textemdash{} Dijkstra on sparse graphs}
+          \textemdash{} varianta cu \texttt{priority\_queue} (EN)
+    \item \href{https://cdn.sepi.ro/infobits-f1.pdf#page=167}{\textbf{Infobits Academy F1}}
+          \textemdash{} p.\ 167 (RO)
+  \end{enumerate}
+\end{frame}
+
+\end{document}

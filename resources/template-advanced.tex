@@ -1,0 +1,107 @@
+% Advanced lesson template (Lot Seniori / competitive programming)
+% Audience: olympiad students with solid graph theory background
+% Style choice: style-adv-01 (Navy+Gold), 02 (Teal+Amber), 03 (Burgundy+Tan), 04 (Charcoal+Emerald)
+% NOTE: do NOT add \usetheme{} here — the style file handles it.
+
+\documentclass[10pt]{beamer}
+\usepackage{../../resources/style-adv-01}  % <- change 01-04 to pick color scheme
+
+% --- Metadata ---
+\title{Titlul Lectiei}
+\subtitle{Lot Seniori --- Algoritmi pe Grafuri}
+\author{Andrei Mihai Ciobanu}
+\institute{Algolymp Summer School}
+\date{}
+\titlegraphic{\includegraphics[width=3cm]{../../resources/algolymp-logo.png}}
+\setbeamertemplate{frame footer}{Algolymp --- Lot Seniori}
+
+% --- Shared TikZ styles for graph diagrams ---
+\tikzset{
+  nd/.style={circle,draw=advPrimary,fill=advPrimary!8,thick,minimum size=9mm,font=\small\bfseries\color{advPrimary}},
+  src/.style={nd,fill=advAccent!25,draw=advAccent,text=black},
+  snk/.style={nd,fill=advPrimary!25},
+  eg/.style={->,>=Stealth,thick,draw=advPrimary},
+  eghigh/.style={->,>=Stealth,very thick,draw=advAccent},
+  egres/.style={->,>=Stealth,dashed,thick,draw=gray!55},
+  elbl/.style={font=\tiny,fill=white,inner sep=1pt,text=black}
+}
+
+% ----------------------------------------------------------------
+\begin{document}
+
+\begin{frame}
+  \titlepage
+\end{frame}
+
+\begin{frame}{Cuprins}
+  \tableofcontents
+\end{frame}
+
+% ----------------------------------------------------------------
+\section{Sectiunea 1}
+
+\begin{frame}{Slide teoretic}
+  \begin{block}{Definitie}
+    Definitia merge aici.
+  \end{block}
+  \begin{itemize}
+    \item Punct 1
+    \item Punct 2
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Slide cu diagrama TikZ}
+  \begin{center}
+  \begin{tikzpicture}
+    \node[src] (S) at (0,0) {S};
+    \node[nd]  (A) at (3,1) {A};
+    \node[snk] (T) at (6,0) {T};
+    \draw[eg] (S) -- node[elbl,above] {cap/cost} (A);
+    \draw[eg] (A) -- node[elbl,above] {cap/cost} (T);
+  \end{tikzpicture}
+  \end{center}
+\end{frame}
+
+\begin{frame}[fragile]{Slide cu cod}
+  \begin{lstlisting}
+// C++ code here
+int main() { return 0; }
+  \end{lstlisting}
+\end{frame}
+
+% ----------------------------------------------------------------
+\section{Recapitulare}
+
+\begin{frame}{Recapitulare}
+  \begin{center}
+  \begin{tabular}{lll}
+    \toprule
+    Algoritm & Timp & Spatiu \\
+    \midrule
+    Exemplu & $O(n \log n)$ & $O(n)$ \\
+    \bottomrule
+  \end{tabular}
+  \end{center}
+\end{frame}
+
+% ----------------------------------------------------------------
+\section{Resurse}
+
+\begin{frame}{Resurse}
+  \begin{itemize}
+    \item \href{https://cp-algorithms.com}{cp-algorithms.com}
+    \item \href{https://codeforces.com}{Codeforces}
+  \end{itemize}
+\end{frame}
+
+% ----------------------------------------------------------------
+\section{Probleme de antrenament}
+
+\begin{frame}{Probleme de antrenament}
+  \begin{itemize}
+    \item \href{https://codeforces.com/problemset}{Problema 1 (CF)}
+    \item \href{https://cses.fi/problemset}{Problema 2 (CSES)}
+  \end{itemize}
+\end{frame}
+
+\end{document}

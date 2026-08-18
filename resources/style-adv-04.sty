@@ -1,0 +1,62 @@
+\ProvidesPackage{style-adv-04}
+% Advanced lesson style: Charcoal + Emerald
+% Usage: \usepackage{../../resources/style-adv-04}
+
+\usepackage{xcolor}
+\definecolor{advPrimary}{RGB}{44,44,44}
+\definecolor{advAccent}{RGB}{45,122,79}
+\definecolor{codebg}{RGB}{238,238,238}
+\definecolor{codecomment}{RGB}{90,90,90}
+\definecolor{codekeyword}{RGB}{44,44,44}
+\definecolor{codestring}{RGB}{45,122,79}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[romanian,english]{babel}
+\usepackage{amsmath,amssymb,mathtools}
+\usepackage{listings}
+\lstset{
+  backgroundcolor=\color{codebg},
+  basicstyle=\ttfamily\scriptsize,
+  keywordstyle=\color{codekeyword}\bfseries,
+  commentstyle=\color{codecomment}\itshape,
+  stringstyle=\color{codestring},
+  numbers=left, numberstyle=\tiny\color{gray}, numbersep=5pt, stepnumber=1,
+  showspaces=false, showstringspaces=false,
+  breaklines=true, frame=single, rulecolor=\color{gray!30},
+  captionpos=b, language=C++, tabsize=2,
+  morekeywords={vector,pair,map,set,queue,stack,priority_queue,auto,int64_t,ll,pll,pli}
+}
+\usepackage{graphicx}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning,shapes,calc,decorations.pathreplacing,quotes,fit}
+\usepackage{booktabs,array,multirow}
+
+\makeatletter
+\@ifclassloaded{beamer}{%
+  \usetheme{metropolis}
+  \metroset{progressbar=frametitle, block=fill, numbering=fraction}
+
+  \setbeamercolor{palette primary}{bg=advPrimary, fg=white}
+  \setbeamercolor{frametitle}{bg=advPrimary, fg=white}
+  \setbeamercolor{progress bar}{fg=advAccent, bg=advPrimary!60}
+  \setbeamercolor{title separator}{fg=advAccent}
+  \setbeamercolor{alerted text}{fg=advAccent}
+  \setbeamercolor{block title}{bg=advPrimary!12, fg=advPrimary}
+  \setbeamercolor{block body}{bg=advPrimary!4, fg=black}
+  \setbeamercolor{block title alerted}{bg=advAccent!25, fg=advPrimary}
+  \setbeamercolor{block body alerted}{bg=advAccent!10, fg=black}
+  \setbeamercolor{block title example}{bg=advAccent!20, fg=advAccent!70!black}
+  \setbeamercolor{block body example}{bg=advAccent!8, fg=black}
+
+  \setbeamerfont{block body}{size=\small}
+  \setbeamerfont{block title}{size=\small,series=\bfseries}
+  \setbeamerfont{itemize/enumerate body}{size=\small}
+  \setbeamerfont{itemize/enumerate subbody}{size=\footnotesize}
+
+  \setlength{\leftmargini}{1.2em}
+  \setlength{\leftmarginii}{1em}
+  \setlength{\itemsep}{1pt}
+  \setlength{\parskip}{0pt}
+}{}
+\makeatother

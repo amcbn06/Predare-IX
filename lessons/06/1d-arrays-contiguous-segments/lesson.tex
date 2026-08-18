@@ -1,0 +1,437 @@
+\documentclass{beamer}
+\usepackage{../../../resources/themes/algolymp-light}
+
+\title{Tablouri unidimensionale}
+\subtitle{Probleme cu secvenÈ›e}
+\author{Andrei Mihai Ciobanu}
+\institute{Algolymp Summer School}
+\date{}
+\titlegraphic{\includegraphics[width=3cm]{../../../resources/algolymp-logo.png}}
+\setbeamertemplate{frame footer}{Algolymp Summer School}
+
+% ================================================================
+\begin{document}
+
+\begin{frame}
+  \titlepage
+\end{frame}
+
+\begin{frame}{Cuprins}
+  \tableofcontents[hideallsubsections]
+\end{frame}
+
+% ================================================================
+\section{Introducere}
+
+\begin{frame}[shrink]{DefiniÈ›ie}
+  \begin{block}{DefiniÈ›ie}
+    Se numeÈ™te \textbf{secvenÈ›Äƒ} a vectorului $X$ o succesiune de
+    \textbf{elemente consecutive} din $X$, Ã®n ordinea din $X$. Orice secvenÈ›Äƒ a unui vector este unic determinatÄƒ de doi indici $l \leq r$, ai primului, respectiv ultimului element din secvenÈ›Äƒ.
+  \end{block}
+  \begin{block}{Lungimea unei secvenÈ›e}
+    SecvenÈ›a $[l, r]$ are lungimea $r - l + 1$.\\
+    Exemplu: $[3, 7]$ are lungimea $7 - 3 + 1 = 5$.
+  \end{block}
+  \begin{block}{DefiniÈ›ie alternativÄƒ}
+    O secvenÈ›Äƒ continuÄƒ se obÈ›ine eliminÃ¢nd cÃ¢teva elemente de la \textbf{Ã®nceputul} È™irului
+    (posibil niciunul) È™i cÃ¢teva de la \textbf{final} (posibil niciunul).
+  \end{block}
+  \beginnote{Termenii Â«continuÄƒÂ» È™i Â«contiguÄƒÂ» se folosesc interschimbabil Ã®n contextul secvenÈ›elor.}
+\end{frame}
+
+\begin{frame}{Exemple de secvenÈ›e continue}
+  \begin{center}
+  \begin{tikzpicture}[scale=0.85]
+    \foreach \i/\v in {1/4, 2/7, 3/2, 4/9, 5/1, 6/5, 7/8, 8/3} {
+      \node[draw, thick, minimum width=10mm, minimum height=10mm, fill=white]
+        at ({(\i-1)*1.15}, 0) {\v};
+      \node[font=\tiny, gray] at ({(\i-1)*1.15}, -0.75) {\i};
+    }
+    \draw[thick, rounded corners=2pt]
+      (0.575, -0.55) rectangle (3.875, 0.55);
+    \node[font=\scriptsize, above] at (2.30, 0.65) {continuÄƒ $[2,4]$: 7, 2, 9};
+    \draw[thick, dashed, rounded corners=2pt]
+      (4.025, -0.55) rectangle (7.325, 0.55);
+    \node[font=\scriptsize, above] at (5.75, 0.65) {continuÄƒ $[5,7]$: 1, 5, 8};
+  \end{tikzpicture}
+  \end{center}
+  \begin{columns}[T]
+  \column{0.50\textwidth}
+    \begin{block}{SecvenÈ›e continue}
+      \begin{footnotesize}
+      \begin{itemize}\itemsep0pt
+        \item $[2,4]$: valorile 7, 2, 9
+        \item $[5,7]$: valorile 1, 5, 8
+        \item $[4,7]$: valorile 9, 1, 5, 8
+        \item $[3,3]$: doar valoarea 2
+      \end{itemize}
+      \end{footnotesize}
+    \end{block}
+  \column{0.48\textwidth}
+    \begin{alertblock}{Nu sunt continue}
+      \begin{footnotesize}
+      \begin{itemize}\itemsep0pt
+        \item $\{4, 2, 8\}$: poz. 1, 3, 7
+        \item $\{7, 9, 5\}$: poz. 2, 4, 6
+      \end{itemize}
+      \end{footnotesize}
+    \end{alertblock}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{CÃ¢te secvenÈ›e existÄƒ Ã®ntr-un È™ir?}
+  \begin{columns}[T]
+  \column{0.44\textwidth}
+    \begin{center}
+    \resizebox{\linewidth}{!}{%
+    \begin{tabular}{c p{2.5cm} c}
+      \toprule
+      Start & Capete posibile \\
+      \midrule
+      1 & 1, 2, 3, 4, 5 \\
+      2 & 2, 3, 4, 5  \\
+      3 & 3, 4, 5  \\
+      4 & 4, 5  \\
+      5 & 5 \\
+      \bottomrule
+    \end{tabular}}
+    \end{center}
+  \column{0.54\textwidth}
+    \begin{block}{Formula generalÄƒ}
+      \[ 1 + 2 + \cdots + n = \frac{n(n+1)}{2} \]
+    \end{block}
+    \begin{alertblock}{ProblemÄƒ}
+      La $n = 200{.}000$: circa $2 \times 10^{10}$ secvenÈ›e.
+      Avem nevoie de metode mai eficiente.
+    \end{alertblock}
+  \end{columns}
+\end{frame}
+
+\begin{frame}[shrink, fragile]{Varianta naivÄƒ --- $O(n^3)$}
+  \begin{lstlisting}
+int n, a[200001]; // ... citire ...
+int lmax = 1, rmax = 0;
+for (int l = 1; l <= n; l++) {
+    for (int r = l; r <= n; r++) {
+        bool ok = true;
+        for (int k = l; k <= r; k++)
+            if (a[k] % 2 == 0) { ok = false; break; }
+        if (ok && r - l + 1 > rmax - lmax + 1)
+            lmax = l, rmax = r;
+    }
+}
+// lungimea = rmax - lmax + 1
+  \end{lstlisting}
+  \begin{columns}[T]
+  \column{0.48\textwidth}
+    \begin{block}{Complexitate: $O(n^3)$}
+      Bucla interioarÄƒ reface verificarea complet.
+    \end{block}
+  \column{0.50\textwidth}
+    \begin{alertblock}{Prea lentÄƒ!}
+      La $n = 5{.}000$: $\approx 10^{10}$ operaÈ›ii.\\ $\Rightarrow$ Mult prea Ã®ncet.
+    \end{alertblock}
+  \end{columns}
+\end{frame}
+
+\begin{frame}[fragile]{Varianta de bazÄƒ --- $O(n^2)$}
+  EliminÄƒm bucla interioarÄƒ: parcurgem toate perechile $(l, r)$ cu $l \leq r$, extinzÃ¢nd secvenÈ›a cu cÃ¢te un element:
+  \begin{lstlisting}
+int n, a[200001];
+// ... citire n si a[1..n] ...
+
+for (int l = 1; l <= n; l++) {
+    for (int r = l; r <= n; r++) {
+        // prelucreaza secventa a[l..r]
+    }
+}
+  \end{lstlisting}
+  \begin{block}{CÃ¢nd este suficientÄƒ?}
+    Numai cÃ¢nd $n \leq 3{.}000$\textendash$5{.}000$.
+    DacÄƒ $n = 200{.}000$, avem nevoie de una din metodele din secÈ›iunea urmÄƒtoare.
+  \end{block}
+\end{frame}
+
+% ================================================================
+\section{Diverse abordÄƒri}
+
+\subsection{ProprietÄƒÈ›i locale}
+
+\begin{frame}[shrink]{O metodÄƒ mai bunÄƒ: proprietÄƒÈ›i locale}
+  DacÄƒ È™tiu cÄƒ secvenÈ›a $[l, r]$ este validÄƒ, pot afla rapid dacÄƒ $[l, r+1]$ este validÄƒ? DacÄƒ \textbf{da}: putem parcurge È™irul o singurÄƒ datÄƒ, nefiind nevoie de 2 bucle imbricate.
+  \smallskip
+  \begin{block}{Exemple Ã®n care funcÈ›ioneazÄƒ}
+    \begin{itemize}
+      \item SecvenÈ›e strict crescÄƒtoare: extinderea depinde doar de $a[r]$ È™i $a[r+1]$; orice subsecvenÈ›Äƒ este de asemenea strict crescÄƒtoare
+      \item SecvenÈ›e de numere prime: depinde doar dacÄƒ $a[r+1]$ este prim; orice subsecvenÈ›Äƒ respectÄƒ de asemenea aceastÄƒ proprietate
+    \end{itemize}
+  \end{block}
+  \begin{alertblock}{Exemplu Ã®n care nu funcÈ›ioneazÄƒ: $\gcd(a[l..r]) > 1$}
+    DacÄƒ $\gcd(a[l..r{+}1]) = 1$ (invalid), poate exista $l' > l$ cu $\gcd(a[l'..r{+}1]) > 1$.
+    Nu È™tim unde sÄƒ resetÄƒm \texttt{len} \textemdash{} nu putem folosi simplu \texttt{len = 1}.
+  \end{alertblock}
+\end{frame}
+
+\begin{frame}[fragile, shrink]{SecvenÈ›a strict crescÄƒtoare --- $O(n)$}
+  Èšinem variabila \texttt{len} = lungimea secvenÈ›ei strict crescÄƒtoare care se terminÄƒ \textbf{acum}.
+  La fiecare pas: dacÄƒ $a[i-1] < a[i]$, secvenÈ›a continuÄƒ; altfel, reluÄƒm de la 0.
+  \begin{lstlisting}
+int n, a[200001];
+// ... citire ...
+
+int len = 1, best = 1;
+for (int i = 2; i <= n; i++) {
+    if (a[i-1] < a[i]) {
+        len++;           // secventa continua
+    } else {
+        len = 1;         // secventa s-a rupt, reluam de la i
+    }
+    if (len > best) {
+        best = len;
+    }
+}
+cout << best << "\n";
+  \end{lstlisting}
+\end{frame}
+
+\begin{frame}{Exemplu --- È™irul 1, 3, 5, 2, 3, 6, 7, 8, 4, 9}
+  \begin{center}
+  \footnotesize
+  \begin{tabular}{r|cccccccccc}
+    \toprule
+    $i$           & 1 & 2 & 3 & 4          & 5 & 6 & 7 & 8          & 9          & 10 \\
+    $a[i]$        & 1 & 3 & 5 & 2          & 3 & 6 & 7 & 8          & 4          & 9  \\
+    \texttt{len}  & 1 & 2 & 3 & \textbf{1} & 2 & 3 & 4 & 5          & \textbf{1} & 2  \\
+    \texttt{best} & 1 & 2 & 3 & 3          & 3 & 3 & 4 & \textbf{5} & 5          & 5  \\
+    \bottomrule
+  \end{tabular}
+  \end{center}
+  \begin{block}{Concluzii}
+    PoziÈ›iile $4$\textendash$8$: valorile $2, 3, 6, 7, 8$ formeazÄƒ cel mai lung segment. \textbf{RÄƒspuns: 5}.
+  \end{block}
+  \begin{block}{ProblemÄƒ: \href{https://code.algolymp.com/problems/4204}{Longest Increasing Contiguous Segment}}
+    DeterminÄƒ lungimea maximÄƒ a secvenÈ›ei strict crescÄƒtoare continue. $1 \leq n \leq 200{.}000$.
+  \end{block}
+\end{frame}
+
+\begin{frame}[fragile, shrink]{NumÄƒrarea segmentelor cu o proprietate}
+  \begin{block}{ObservaÈ›ie}
+    DacÄƒ secvenÈ›a cu proprietatea $P$ curentÄƒ are lungimea \texttt{len},
+    atunci exact \texttt{len} astfel de secvenÈ›e se terminÄƒ la $i$.
+  \end{block}
+  \begin{block}{Exemplu: È™irul 2 4 7, proprietatea ``strict crescÄƒtor''}
+    SecvenÈ›ele strict crescÄƒtoare ce se terminÄƒ la 7:
+    $[7]$, $[4,7]$, $[2,4,7]$ \textemdash{} total 3 = \texttt{len}.
+  \end{block}
+  \begin{lstlisting}
+long long answer = 0;
+int len = 1;
+for (int i = 1; i <= n; i++) {
+    if (i > 1 && a[i-1] < a[i]) {
+        len++;
+    }
+    else {
+        len = 1;
+    }
+    answer += len;
+}
+cout << answer << "\n";
+  \end{lstlisting}
+  \beginnote{NumÄƒrul de secvenÈ›e poate fi circa $n^2/2$; foloseÈ™te \texttt{long long} pentru \texttt{answer}}
+\end{frame}
+
+% ================================================================
+\subsection{SecvenÈ›a de sumÄƒ maximÄƒ}
+
+\begin{frame}{SecvenÈ›a de sumÄƒ maximÄƒ}
+  \begin{block}{ProblemÄƒ}
+    GÄƒseÈ™te secvenÈ›a cu suma maximÄƒ (elementele pot fi negative).
+  \end{block}
+  \begin{block}{Algoritmul lui Kadane}
+    Fie \texttt{current} = suma maximÄƒ a secvenÈ›ei care se terminÄƒ la poziÈ›ia $i$.\\[3pt]
+    \textbf{DacÄƒ \texttt{current} $< 0$}: orice prelungire a prefixului curent e mai slabÄƒ
+    decÃ¢t una care Ã®ncepe proaspÄƒt. ResetÄƒm \texttt{current = 0}.\\[3pt]
+    \textbf{Altfel}: extindem cu $a[i]$.
+  \end{block}
+  \begin{block}{Complexitate: $O(n)$, memorie $O(1)$}
+    O singurÄƒ parcurgere; variabilele \texttt{current} È™i \texttt{best}.
+  \end{block}
+\end{frame}
+
+\begin{frame}[fragile]{SecvenÈ›a de sumÄƒ maximÄƒ --- implementare}
+  \begin{lstlisting}
+int n, a[200001];
+// ... citire ...
+int best = a[1], current = a[1];
+for (int i = 2; i <= n; i++) {
+    if (current < 0) {
+      current = 0;
+    }
+    current += a[i];
+    if (current > best) {
+        best = current;
+    }
+}
+cout << best << "\n";
+  \end{lstlisting}
+  IniÈ›ializarea \texttt{best = a[1]} (nu $0$) trateazÄƒ corect cazul
+  Ã®n care toate elementele sunt negative.
+\end{frame}
+
+% ================================================================
+\subsection{Sliding Window}
+
+\begin{frame}[fragile, shrink]{Sliding Window}
+  \begin{block}{ProblemÄƒ}
+    CalculeazÄƒ suma fiecÄƒrei secvenÈ›e de lungime exact $k$.
+    VariantÄƒ directÄƒ: $O(n \cdot k)$. Putem face $O(n)$.
+  \end{block}
+  CÃ¢nd fereastra se mutÄƒ cu un pas la dreapta, iese $a[\text{left}-1]$
+  È™i intrÄƒ $a[\text{left}+k-1]$:
+  \begin{lstlisting}
+long long sum = 0;
+for (int i = 1; i <= k; i++) sum += a[i]; // prima fereastra [1,k]
+// prelucreaza fereastra [1, k]
+
+for (int left = 2; left + k - 1 <= n; left++) {
+    sum -= a[left - 1];      // iese din stanga
+    sum += a[left + k - 1];  // intra din dreapta
+    // prelucreaza fereastra [left, left+k-1]
+}
+  \end{lstlisting}
+  \begin{block}{Complexitate: $O(n)$}
+  \end{block}
+\end{frame}
+
+% ================================================================
+\subsection{Sume parÈ›iale}
+
+\begin{frame}[fragile]{Sume parÈ›iale: cÃ¢te secvenÈ›e de lungime $K$ au suma $\leq X$?}
+  \begin{block}{Idee}
+    Suma secvenÈ›ei $[l, l{+}K{-}1]$ = $\texttt{pref}[l+K-1] - \texttt{pref}[l-1]$.
+    IterÄƒm $l$ de la $1$ la $n{-}K{+}1$ È™i numÄƒrÄƒm cÃ¢te satisfac condiÈ›ia.
+  \end{block}
+  \medskip
+  \begin{lstlisting}
+// pref[0] = 0, pref[i] = pref[i - 1] + a[i]
+int answer = 0;
+for (int l = 1; l + k - 1 <= n; l++) {
+    if (pref[l + k - 1] - pref[l - 1] <= x) {
+        answer++;
+    }
+}
+cout << answer << "\n";
+  \end{lstlisting}
+  \textbf{Complexitate:} $O(n)$ (precalculare + numÄƒrare)
+\end{frame}
+
+% ================================================================
+\subsection{CÄƒutare binarÄƒ}
+
+\begin{frame}{CÄƒutare binarÄƒ pe sume parÈ›iale}
+  \begin{block}{1. ÃŽmpÄƒrÈ›ire Ã®n 2 secvenÈ›e de sume egale --- $O(n)$}
+    Fie $S = \texttt{pref}[n]$. TÄƒietura la $i$ este validÄƒ dacÄƒ $\texttt{pref}[i] = S/2$.
+    IterÄƒm $i \in [1, n{-}1]$ È™i numÄƒrÄƒm.
+  \end{block}
+  \begin{block}{2. ÃŽmpÄƒrÈ›ire Ã®n 3 secvenÈ›e de sume egale --- $O(n \log n)$}
+    FixÄƒm prima tÄƒieturÄƒ la $i$: $\texttt{pref}[i] = S/3$.
+    CÄƒutÄƒm binar a doua tÄƒieturÄƒ $j \in [i{+}1, n{-}1]$ cu $\texttt{pref}[j] = 2S/3$.\\
+    \textit{(NecesitÄƒ $a[i] \geq 0$, altfel sumele parÈ›iale nu sunt crescÄƒtoare.)}
+  \end{block}
+  \begin{alertblock}{3. ÃŽmpÄƒrÈ›ire Ã®n 4 secvenÈ›e}
+    Hint: cum putem adapta ideea de la problema 2?
+  \end{alertblock}
+\end{frame}
+
+\begin{frame}[shrink, fragile]{ÃŽmpÄƒrÈ›ire Ã®n 3 secvenÈ›e de sume egale --- implementare}
+  \begin{lstlisting}
+// S = pref[n], necesita S % 3 == 0 si a[i] >= 0
+int answer = 0;
+for (int i = 1; i <= n - 2; i++) {
+    if (3 * pref[i] != S) {
+        continue;
+    }
+    // ... cautam binar j ...
+    if (pref[j] == 2 * S / 3) {
+        answer++;
+    }
+}
+cout << answer << "\n";
+  \end{lstlisting}
+  \textbf{Complexitate:} $O(n \log n)$; atenÈ›ie cand valorile pot fi nule $\Rightarrow$ $j$ poate avea mai multe valori valide
+
+    Generalizare: $K$ secvenÈ›e $\Rightarrow$ $K{-}1$ tÄƒieturi, cÄƒutÄƒm binar fiecare $\Rightarrow O(K \log n)$ (doar pentru valori pozitive).
+\end{frame}
+
+% ================================================================
+\subsection{Pattern matching}
+
+\begin{frame}[shrink, fragile]{Pattern matching}
+  \begin{block}{ProblemÄƒ: \href{https://code.algolymp.com/problems/4205}{Pattern Inside a Sequence}}
+    Se dau È™irul $a$ (lungime $n$) È™i È™ablonul $b$ (lungime $m$).
+    NumÄƒrÄƒ cÃ¢te poziÈ›ii de start $i$ au proprietatea cÄƒ $a[i..i{+}m{-}1] = b[1..m]$.\\
+    \textbf{RestricÈ›ii:} $1 \leq m \leq n \leq 3{.}000$.
+    \textbf{Exemplu:} $a{=}[1,2,1,2,1]$, $b{=}[1,2,1]$ $\Rightarrow$ rÄƒspuns 2.
+  \end{block}
+  \begin{lstlisting}
+int n, m, a[3001], b[3001], answer = 0;
+for (int start = 1; start + m - 1 <= n; start++) {
+    bool ok = true;
+    for (int j = 1; j <= m; j++) {
+        if (a[start + j - 1] != b[j]) {
+            ok = false;
+            break;
+        }
+    }
+    if (ok) {
+        answer++;
+    }
+}
+cout << answer << "\n";
+  \end{lstlisting}
+  Complexitate: $O(n \cdot m)$, acceptabilÄƒ pentru $n, m \leq 3{.}000$.
+\end{frame}
+
+% ================================================================
+\subsection{Two Pointers}
+
+\begin{frame}{Two Pointers --- tema lecÈ›iei urmÄƒtoare}
+  \begin{block}{CÃ¢nd Sliding Window nu este suficient}
+    Sliding Window funcÈ›ioneazÄƒ pentru lungime \textbf{fixÄƒ} $k$.
+    Two Pointers = fereastrÄƒ cu lungime variabilÄƒ.
+  \end{block}
+  \begin{block}{ProblemÄƒ: secvenÈ›a de lungime maximÄƒ cu suma $\leq K$}
+    Èšinem doi indici $l \leq r$. Extindem $r$ la dreapta; dacÄƒ suma depÄƒÈ™eÈ™te $K$,
+    avansÄƒm $l$. Fiecare index se miÈ™cÄƒ cel mult $n$ paÈ™i: $O(n)$ total.
+  \end{block}
+  \begin{block}{CondiÈ›ie de aplicabilitate}
+    Proprietatea trebuie sÄƒ fie \textbf{monotonÄƒ}: dacÄƒ $[l,r]$ e validÄƒ, atunci
+    $[l, r{-}1]$ e de asemenea validÄƒ.
+  \end{block}
+\end{frame}
+
+% ================================================================
+\section{Recapitulare}
+
+\begin{frame}{Probleme de antrenament}
+  \begin{enumerate}
+    \item \href{https://code.algolymp.com/problems/4204}{\textbf{Longest Increasing Contiguous Segment}}
+    \item \href{https://code.algolymp.com/problems/4205}{\textbf{Pattern Inside a Sequence}}
+    \item \href{https://code.algolymp.com/problems/1929}{\textbf{seism}} (OJI 2021 VI)
+    \item \href{https://code.algolymp.com/problems/3572}{\textbf{mandatar}} (OJI 2025 VI)
+    \item \href{https://code.algolymp.com/problems/2996}{\textbf{Avid}} (OJI 2024 VI)
+    \item \href{https://code.algolymp.com/problems/3853}{\textbf{zudt}} (OJI 2026 VI)
+  \end{enumerate}
+\end{frame}
+
+\begin{frame}{Resurse}
+  \begin{enumerate}
+      \item \href{https://www.pbinfo.ro/articole/5613/secvente-in-vectori}{\textbf{pbinfo} --- SecvenÈ›e Ã®n vectori}
+          \textemdash{} definiÈ›ie, complexitÄƒÈ›i O($n^3$)/O($n^2$)/O($n$), exemple C++
+    \smallskip
+    \item \href{https://www.pbinfo.ro/articole/20499/secventa-de-suma-maxima}{\textbf{pbinfo} --- SecvenÈ›a de sumÄƒ maximÄƒ}
+          \textemdash{} algoritmul lui Kadane explicat pas cu pas
+  \end{enumerate}
+\end{frame}
+
+\end{document}
