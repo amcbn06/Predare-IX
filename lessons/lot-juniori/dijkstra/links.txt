@@ -1,8 +1,0 @@
-https://cp-algorithms.com/graph/dijkstra.html
-https://cp-algorithms.com/graph/dijkstra_sparse.html
-https://cdn.sepi.ro/infobits-f1.pdf
-https://infoarena.ro/problema/dijkstra
-https://infoarena.ro/problema/dmin
-https://infoarena.ro/problema/patrol
-https://infoarena.ro/problema/catun
-https://code.algolymp.com/problems/52

@@ -1,7 +1,0 @@
-https://old.algogenius.ro/two-pointers/
-https://usaco.guide/silver/two-pointers?lang=cpp
-https://cdn.sepi.ro/infobits-f1.pdf
-https://code.algolymp.com/problems/1747
-https://code.algolymp.com/problems/503
-https://cses.fi/problemset/task/1640
-https://code.algolymp.com/problems/4277
