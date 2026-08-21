@@ -2,7 +2,7 @@
 
 Urmărește [programa Olimpiadei Naționale de Informatică](https://cdn.sepi.ro/oni2026/Programa_pentru_olimpiada_de_informatica_gimnaziu_si_liceu_2025-2026.pdf).
 
-## Syllabus
+## Lecții
 
 | # | Topic |
 |---|------|
@@ -17,7 +17,7 @@ Urmărește [programa Olimpiadei Naționale de Informatică](https://cdn.sepi.ro
 | [08](08-prefix-sums-difference-arrays/lesson.pdf) | **Sume parțiale și șmenul lui Mars**<br>Pe șiruri (1D) · Pe matrici (2D) |
 | [09](09-merging-two-pointers/lesson.pdf) | **Interclasarea tablourilor \| Tehnica Two Pointers**<br>Operații cu mulțimi · Sliding Window |
 | [10](10-struct-stl/lesson.pdf) | **Tipuri de date non-omogene**<br>Tipul struct · Structuri de date din STL |
-| 11 | **Algoritmi Greedy**<br>Problema spectacolelor · Diverse probleme |
+| [11](11-greedy/lesson.pdf) | **Metoda Greedy**<br>Problema spectacolelor · Diverse probleme |
 | 12 | **Indicatorul lui Euler \| Funcția Möbius \| Principiul includerii și excluderii** |
 | 13 | **Backtracking**<br>Generarea elementelor combinatoriale |
 | 14 | **Simulare OJI** |
